@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>VertragsCheck – KI Vertrags-Erklärer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="logo">Vertrags<span>Check</span></div>
+      <p class="subtitle">Lade deinen Vertrag hoch oder füge Text ein – die KI erklärt dir alles in Klartext.</p>
+    </header>
+
+    <main class="app-main">
+      <section class="card upload-card">
+        <h2>1. Vertrag eingeben</h2>
+        <p class="hint">
+          Für das MVP kannst du deinen Vertragstext hier einfügen oder eine <strong>.txt</strong>-Datei hochladen.
+          PDF/Foto-Unterstützung kann später ergänzt werden (z.B. mit OCR).
+        </p>
+
+        <label class="file-label">
+          <input type="file" id="fileInput" accept=".txt" />
+          <span>📄 Text-Datei wählen (.txt)</span>
+        </label>
+
+        <div class="divider">oder</div>
+
+        <textarea id="contractText" placeholder="Vertragstext hier einfügen..."></textarea>
+
+        <button id="analyzeBtn" class="primary-btn">Vertrag analysieren</button>
+
+        <p class="privacy-note">
+          🔒 Wir speichern deine Daten nicht. Alles wird nur für diese Analyse verwendet.
+        </p>
+      </section>
+
+      <section class="card result-card hidden" id="resultCard">
+        <h2>2. Analyse-Ergebnis</h2>
+
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Dein Vertrag wird analysiert...</p>
+        </div>
+
+        <div id="errorBox" class="error-box hidden"></div>
+
+        <div id="resultContent" class="result-content hidden">
+          <section class="result-section">
+            <h3>Überblick</h3>
+            <div class="grid">
+              <div class="info-pill">
+                <span class="label">Vertragsart</span>
+                <span class="value" id="contractType">–</span>
+              </div>
+              <div class="info-pill">
+                <span class="label">Monatliche Kosten</span>
+                <span class="value" id="monthlyCost">–</span>
+              </div>
+              <div class="info-pill">
+                <span class="label">Laufzeit</span>
+                <span class="value" id="term">–</span>
+              </div>
+              <div class="info-pill">
+                <span class="label">Kündigungsfrist</span>
+                <span class="value" id="cancellationPeriod">–</span>
+              </div>
+              <div class="info-pill">
+                <span class="label">Verlängerung</span>
+                <span class="value" id="renewal">–</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="result-section">
+            <h3>Klartext-Erklärung</h3>
+            <p id="plainExplanation" class="plain-text"></p>
+          </section>
+
+          <section class="result-section">
+            <h3>Risiken & Hinweise</h3>
+            <ul id="risksList" class="risks-list"></ul>
+          </section>
+
+          <section class="result-section">
+            <h3>Kündigungsstatus</h3>
+            <p id="cancellationStatus" class="plain-text"></p>
+          </section>
+
+          <section class="result-section action-section">
+            <h3>Kündigungsschreiben</h3>
+            <textarea id="terminationLetter" readonly></textarea>
+            <div class="action-buttons">
+              <button id="copyLetterBtn" class="secondary-btn">Text kopieren</button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>VertragsCheck – MVP-Prototyp. KI läuft über die OpenAI-API (API-Key als Umgebungsvariable).</p>
+      <p>Hinweis: Dies ersetzt keine Rechtsberatung, sondern hilft dir, Verträge besser zu verstehen.</p>
+    </footer>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
