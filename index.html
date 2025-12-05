@@ -5,33 +5,37 @@
   <title>VertragsCheck – KI Vertrags-Erklärer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* Inter – Standard-Font für moderne Web-/KI-Apps */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
     :root {
-      --bg: #020617;
-      --bg-card: #0b1120;
-      --border-card: #1e293b;
-      --accent: #2563eb;
-      --accent-dark: #1e40af;
-      --accent-soft: #1d4ed8;
+      --bg: #0b1020;
+      --bg-card: #151a2a;
+      --border-card: #252b3d;
+      --accent: #3b82f6;
+      --accent-dark: #1d4ed8;
+      --accent-soft: #60a5fa;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
+      --text-soft: #cbd5f5;
       --danger: #ef4444;
       --danger-soft: #fee2e2;
       --success: #22c55e;
     }
 
-    * , *::before, *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #020617 100%);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
-      justify-content: center;   /* Mitte horizontal */
-      align-items: center;       /* Mitte vertikal */
+      justify-content: center;
+      align-items: center;
       padding: 16px;
     }
 
@@ -40,34 +44,37 @@
       width: 390px;             /* typische Handy-Breite */
       max-width: 100%;
       min-height: 780px;        /* „Screen-Höhe“ simulieren */
-      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #020617 100%);
       border-radius: 32px;
-      padding: 20px 16px 18px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+      padding: 22px 18px 18px;
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(148, 163, 184, 0.08);
       display: flex;
       flex-direction: column;
     }
 
     .app-header {
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .logo {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
+      color: #f9fafb;
     }
 
     .logo span {
-      color: var(--accent);
+      color: var(--accent-soft);
     }
 
     .subtitle {
       margin-top: 6px;
-      color: var(--text-muted);
+      color: var(--text-soft);
       font-size: 13px;
-      line-height: 1.3;
+      line-height: 1.35;
     }
 
     .app-main {
@@ -79,22 +86,27 @@
     }
 
     .card {
-      background: linear-gradient(145deg, #020617 0%, #020617 40%, #020617 80%);
-      border-radius: 18px;
-      border: 1px solid var(--border-card);
-      padding: 14px 14px 16px;
-      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.7);
+      background: radial-gradient(circle at top left, #1f2937 0, #0b1120 45%, #020617 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      padding: 16px 16px 16px;
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 0.8);
     }
 
     .card h2 {
-      font-size: 16px;
+      font-size: 15px;
+      font-weight: 600;
       margin: 0 0 6px;
+      color: #e5e7f5;
     }
 
     .hint {
       font-size: 12px;
       color: var(--text-muted);
-      margin-bottom: 10px;
+      margin-bottom: 11px;
+      line-height: 1.4;
     }
 
     .file-label {
@@ -103,18 +115,19 @@
       justify-content: center;
       gap: 8px;
       border-radius: 999px;
-      padding: 8px 14px;
-      border: 1px dashed #334155;
-      background: rgba(15, 23, 42, 0.7);
+      padding: 9px 14px;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
       color: var(--text-main);
       font-size: 13px;
       cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
     }
 
     .file-label:hover {
       background: #020617;
-      border-color: var(--accent);
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.6);
       transform: translateY(-1px);
     }
 
@@ -137,7 +150,7 @@
       top: 50%;
       width: 35%;
       height: 1px;
-      background: #1f2937;
+      background: rgba(55, 65, 81, 0.9);
     }
 
     .divider::before {
@@ -150,26 +163,26 @@
 
     textarea {
       width: 100%;
-      min-height: 120px;
+      min-height: 130px;
       max-height: 220px;
       resize: vertical;
       border-radius: 14px;
-      border: 1px solid #1f2937;
-      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      background: rgba(15, 23, 42, 0.9);
       color: var(--text-main);
-      padding: 8px 10px;
+      padding: 9px 11px;
       font-size: 13px;
       outline: none;
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
 
     textarea::placeholder {
-      color: #475569;
+      color: #4b5563;
     }
 
     textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.6);
       background: #020617;
     }
 
@@ -177,7 +190,7 @@
     .secondary-btn {
       border-radius: 999px;
       border: none;
-      padding: 9px 16px;
+      padding: 10px 16px;
       font-size: 13px;
       cursor: pointer;
       font-weight: 500;
@@ -185,32 +198,46 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease, opacity 0.1s ease;
     }
 
     .primary-btn {
       margin-top: 10px;
-      background: linear-gradient(135deg, var(--accent-soft), var(--accent-dark));
+      background: linear-gradient(120deg, var(--accent-soft), var(--accent-dark));
       color: white;
-      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.5);
+      box-shadow:
+        0 14px 30px rgba(37, 99, 235, 0.8),
+        0 0 14px rgba(59, 130, 246, 0.9);
       width: 100%;
       justify-content: center;
     }
 
     .primary-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 16px 28px rgba(37, 99, 235, 0.65);
+      box-shadow:
+        0 20px 40px rgba(37, 99, 235, 0.9),
+        0 0 18px rgba(59, 130, 246, 1);
     }
 
     .primary-btn:active {
       transform: translateY(0);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.7),
+        0 0 12px rgba(59, 130, 246, 0.8);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.7;
+      cursor: default;
+      box-shadow: none;
     }
 
     .secondary-btn {
       background: rgba(15, 23, 42, 0.9);
       color: var(--text-main);
-      border: 1px solid #1f2937;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding-inline: 14px;
+      font-size: 12px;
     }
 
     .secondary-btn:hover {
@@ -221,15 +248,26 @@
       margin-top: 8px;
       font-size: 11px;
       color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .privacy-note::before {
+      content: "🔒";
+      font-size: 11px;
+      opacity: 0.9;
     }
 
     .result-card {
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
     .result-card h2 {
       margin-bottom: 8px;
-      font-size: 15px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e5e7f5;
     }
 
     .result-section {
@@ -237,8 +275,10 @@
     }
 
     .result-section h3 {
-      font-size: 13px;
+      font-size: 12px;
       margin: 0 0 4px;
+      font-weight: 600;
+      color: #e5e7f5;
     }
 
     .grid {
@@ -250,8 +290,8 @@
     .info-pill {
       padding: 6px 8px;
       border-radius: 12px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid #1f2937;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.9);
       display: flex;
       flex-direction: column;
       gap: 2px;
@@ -269,6 +309,7 @@
     .plain-text {
       font-size: 12px;
       color: var(--text-main);
+      line-height: 1.4;
     }
 
     .risks-list {
@@ -307,9 +348,9 @@
       align-items: center;
       gap: 8px;
       padding: 6px 8px;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.9);
       border-radius: 12px;
-      border: 1px solid #1f2937;
+      border: 1px solid rgba(55, 65, 81, 0.9);
       margin-bottom: 8px;
       font-size: 12px;
     }
@@ -318,8 +359,8 @@
       width: 14px;
       height: 14px;
       border-radius: 999px;
-      border: 2px solid #1f2937;
-      border-top-color: var(--accent);
+      border: 2px solid rgba(55, 65, 81, 0.9);
+      border-top-color: var(--accent-soft);
       animation: spin 0.8s linear infinite;
     }
 
@@ -380,7 +421,7 @@
         <button id="analyzeBtn" class="primary-btn">Vertrag analysieren</button>
 
         <p class="privacy-note">
-          🔒 Wir speichern deine Daten nicht. Alles wird nur für diese Analyse verwendet.
+          Wir speichern deine Daten nicht. Alles wird nur für diese Analyse verwendet.
         </p>
       </section>
 
