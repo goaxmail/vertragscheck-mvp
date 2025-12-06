@@ -387,7 +387,151 @@
       color: var(--text-muted);
       line-height: 1.4;
     }
-  </style>
+
+    /* Views for tab navigation */
+    .view {
+      display: none;
+    }
+
+    .view.view-active {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+
+    /* Bottom tab navigation */
+    .tab-bar {
+      margin-top: 10px;
+      padding: 6px 10px;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      display: flex;
+      gap: 6px;
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.9);
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        transform 0.05s ease,
+        box-shadow 0.15s ease,
+        opacity 0.1s ease;
+    }
+
+    .tab-btn span {
+      line-height: 1;
+    }
+
+    .tab-btn-active {
+      background: radial-gradient(circle at top, var(--accent-soft), var(--accent-dark));
+      color: #f9fafb;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.8);
+      opacity: 1;
+    }
+
+    .tab-btn-active span {
+      font-weight: 600;
+    }
+
+    /* Simple bullet list for info cards */
+    .bullet-list {
+      margin: 0;
+      padding-left: 16px;
+      font-size: 12px;
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bullet-list li {
+      margin-bottom: 2px;
+    }
+
+    /* Pricing layout */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .pricing-card {
+      border-radius: 16px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.95);
+      padding: 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pricing-card-pro {
+      border-color: rgba(59, 130, 246, 0.9);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.6);
+    }
+
+    .pill-label {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      color: var(--text-soft);
+    }
+
+    .pricing-card-pro .pill-label {
+      background: radial-gradient(circle at top, var(--accent-soft), var(--accent-dark));
+      color: #f9fafb;
+      border-color: transparent;
+    }
+
+    .pricing-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .pricing-list li {
+      position: relative;
+      padding-left: 12px;
+    }
+
+    .pricing-list li::before {
+      content: "•";
+      position: absolute;
+      left: 2px;
+      top: 0;
+      color: var(--accent-soft);
+    }
+
+</style>
 </head>
 <body>
   <div class="app">
@@ -399,7 +543,9 @@
     </header>
 
     <main class="app-main">
-      <section class="card upload-card">
+
+      <div id="view-check" class="view view-active">
+<section class="card upload-card">
         <h2>1. Vertrag eingeben</h2>
         <p class="hint">
           Für das MVP kannst du deinen Vertragstext hier einfügen oder eine <strong>.txt</strong>-Datei hochladen.
@@ -483,19 +629,84 @@
           </section>
         </div>
       </section>
-    
-<nav class="bottom-actions">
-  <button id="newContractBtn" class="bottom-btn">
-    🔁 Neuer Vertrag
-  </button>
-  <button id="infoBtn" class="bottom-btn bottom-btn-secondary">
-    ℹ️ Info & Hinweise
-  </button>
-</nav>
+      </div>
+
+
+      <div id="view-privacy" class="view">
+        <section class="card">
+          <h2>Datenschutz &amp; KI-Nutzung</h2>
+          <p class="hint">Kurz &amp; verständlich erklärt, was mit deinen Daten passiert.</p>
+          <ul class="bullet-list">
+            <li>✅ Deine Vertragsdaten werden nur für diese Analyse verwendet.</li>
+            <li>✅ Im aktuellen MVP speichern wir deine Verträge nicht dauerhaft.</li>
+            <li>✅ Es gibt keine Werbung und keinen Verkauf deiner Daten.</li>
+            <li>ℹ️ Die Analyse läuft aktuell über die OpenAI-API als Auftragsverarbeiter.</li>
+            <li>⚠️ Dies ersetzt keine Rechtsberatung, sondern unterstützt dein Verständnis.</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>Deine Kontrolle</h2>
+          <p class="hint">Du entscheidest, welche Verträge du analysieren lässt.</p>
+          <ul class="bullet-list">
+            <li>Du kannst sensible Daten im Vertrag vor dem Einfügen anonymisieren.</li>
+            <li>Sende keine unnötigen personenbezogenen Daten, wenn sie für die Prüfung nicht relevant sind.</li>
+          </ul>
+        </section>
+      </div>
+
+
+      <div id="view-pricing" class="view">
+        <section class="card">
+          <h2>Free vs. Pro</h2>
+          <p class="hint">So könnte das Geschäftsmodell von VertragsCheck aussehen – transparent und ohne Datenverkauf.</p>
+          <div class="pricing-grid">
+            <div class="pricing-card">
+              <div class="pill-label">Free (MVP)</div>
+              <ul class="pricing-list">
+                <li>✅ Vertragsanalyse per Copy &amp; Paste</li>
+                <li>✅ Risiko-Übersicht &amp; Klartext-Erklärung</li>
+                <li>✅ Voll nutzbar ohne Registrierung</li>
+              </ul>
+            </div>
+            <div class="pricing-card pricing-card-pro">
+              <div class="pill-label">Pro (geplant)</div>
+              <ul class="pricing-list">
+                <li>✨ Unbegrenzte Analysen pro Monat</li>
+                <li>✨ PDF-Upload mit Texterkennung (OCR)</li>
+                <li>✨ Vertrags-Historie mit Zusammenfassungen</li>
+                <li>✨ Erweiterte Checks &amp; optionale Erinnerungen</li>
+              </ul>
+            </div>
+          </div>
+          <p class="hint">Wichtig: Einnahmen sollen später ausschließlich über Pro-Abos kommen – nicht über die Nutzung oder Weitergabe deiner Daten.</p>
+        </section>
+
+        <section class="card">
+          <h2>Früher Zugang &amp; Feedback</h2>
+          <p class="hint">
+            Dieses MVP zeigt Investoren und Nutzer:innen, wie VertragsCheck funktionieren soll.
+            Später kann hier z. B. ein Early-Access-Formular oder Login-Link für Pro stehen.
+          </p>
+        </section>
+      </div>
 
     </main>
 
-    <footer class="app-footer">
+    
+    <nav class="tab-bar">
+      <button class="tab-btn tab-btn-active" data-view="view-check">
+        🏠 <span>Check</span>
+      </button>
+      <button class="tab-btn" data-view="view-privacy">
+        🔒 <span>Datenschutz</span>
+      </button>
+      <button class="tab-btn" data-view="view-pricing">
+        💎 <span>Pro &amp; Preise</span>
+      </button>
+    </nav>
+
+<footer class="app-footer">
       <p>VertragsCheck – MVP-Prototyp. KI läuft über die OpenAI-API (API-Key als Umgebungsvariable).</p>
       <p>Hinweis: Dies ersetzt keine Rechtsberatung, sondern hilft dir, Verträge besser zu verstehen.</p>
     </footer>

@@ -17,8 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const errorBox = document.getElementById("errorBox");
   const resultContent = document.getElementById("resultContent");
 
-  const newContractBtn = document.getElementById("newContractBtn");
-  const infoBtn = document.getElementById("infoBtn");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const views = {
+    "view-check": document.getElementById("view-check"),
+    "view-privacy": document.getElementById("view-privacy"),
+    "view-pricing": document.getElementById("view-pricing"),
+  };
 
   const contractTypeEl = document.getElementById("contractType");
   const monthlyCostEl = document.getElementById("monthlyCost");
@@ -141,6 +145,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+
+  function setActiveView(targetId) {
+    Object.entries(views).forEach(([id, el]) => {
+      if (!el) return;
+      if (id === targetId) {
+        el.classList.add("view-active");
+      } else {
+        el.classList.remove("view-active");
+      }
+    });
+  }
+
+  if (tabButtons && tabButtons.length) {
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.view;
+        if (!target) return;
+
+        setActiveView(target);
+
+        tabButtons.forEach((b) => b.classList.remove("tab-btn-active"));
+        btn.classList.add("tab-btn-active");
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+  }
+
   copyLetterBtn.addEventListener("click", async () => {
     const text = terminationLetterEl.value.trim();
     if (!text) {
@@ -158,25 +190,4 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Kopieren nicht möglich. Bitte markiere den Text manuell.");
     }
   });
-
-  if (newContractBtn) {
-    newContractBtn.addEventListener("click", () => {
-      fileInput.value = "";
-      contractTextEl.value = "";
-      resultCard.classList.add("hidden");
-      resultContent.classList.add("hidden");
-      errorBox.classList.add("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-
-  if (infoBtn) {
-    infoBtn.addEventListener("click", () => {
-      const footer = document.querySelector(".app-footer");
-      if (footer) {
-        footer.scrollIntoView({ behavior: "smooth" });
-      }
-    });
-  }
-
 });
