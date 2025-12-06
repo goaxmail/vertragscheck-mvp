@@ -31,7 +31,7 @@
     body {
       margin: 0;
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 55%, #020617 100%);
+      background: radial-gradient(circle at top, #020617 0, #020617 55%, #020617 100%);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -49,8 +49,8 @@
       border-radius: 32px;
       padding: 22px 18px 18px;
       box-shadow:
-        0 30px 80px rgba(0, 0, 0, 0.85),
-        0 0 0 1px rgba(148, 163, 184, 0.08);
+        0 18px 40px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
       display: flex;
       flex-direction: column;
     }
@@ -91,9 +91,7 @@
       border-radius: 20px;
       border: 1px solid rgba(148, 163, 184, 0.25);
       padding: 16px;
-      box-shadow:
-        0 18px 40px rgba(15, 23, 42, 0.85),
-        0 0 0 1px rgba(15, 23, 42, 0.8);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.75);
     }
 
     .card h2 {
@@ -129,7 +127,7 @@
     .file-label:hover {
       background: #020617;
       border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.6);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
       transform: translateY(-1px);
     }
 
@@ -184,7 +182,7 @@
 
     textarea:focus {
       border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.6);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
       background: #020617;
     }
 
@@ -206,16 +204,16 @@
 
     .primary-btn {
       margin-top: 10px;
-      background: linear-gradient(120deg, var(--accent-soft), var(--accent-dark));
+      background: linear-gradient(140deg, #3b82f6, #1d4ed8);
       color: white;
-      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.6);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
       width: 100%;
       justify-content: center;
     }
 
     .primary-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.75);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
     }
 
     .primary-btn:active {
@@ -404,12 +402,12 @@
     .tab-bar {
       margin-top: 10px;
       padding: 6px 10px;
-      background: rgba(15, 23, 42, 0.96);
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(15, 23, 42, 0.98));
       border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.85);
       display: flex;
       gap: 6px;
-      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
     }
 
     .tab-btn {
@@ -439,9 +437,9 @@
     }
 
     .tab-btn-active {
-      background: radial-gradient(circle at top, var(--accent-soft), var(--accent-dark));
+      background: linear-gradient(140deg, #3b82f6, #1d4ed8);
       color: #f9fafb;
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.8);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
       opacity: 1;
     }
 
@@ -485,7 +483,7 @@
 
     .pricing-card-pro {
       border-color: rgba(59, 130, 246, 0.9);
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.6);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
     }
 
     .pill-label {
