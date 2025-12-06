@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const errorBox = document.getElementById("errorBox");
   const resultContent = document.getElementById("resultContent");
 
+  const newContractBtn = document.getElementById("newContractBtn");
+  const infoBtn = document.getElementById("infoBtn");
+
   const contractTypeEl = document.getElementById("contractType");
   const monthlyCostEl = document.getElementById("monthlyCost");
   const termEl = document.getElementById("term");
@@ -57,9 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setLoading(isLoading) {
     if (isLoading) {
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = "Wird analysiert...";
       loadingEl.classList.remove("hidden");
       resultContent.classList.add("hidden");
     } else {
+      analyzeBtn.disabled = false;
+      analyzeBtn.textContent = "Vertrag analysieren";
       loadingEl.classList.add("hidden");
     }
   }
@@ -69,6 +76,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = contractTextEl.value.trim();
     if (!text) {
       showError("Bitte gib zuerst einen Vertragstext ein oder lade eine Datei hoch.");
+      return;
+    }
+
+    if (text.length < 40) {
+      showError("Bitte gib einen Vertragstext mit mindestens 40 Zeichen ein.");
       return;
     }
 
@@ -146,4 +158,25 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Kopieren nicht möglich. Bitte markiere den Text manuell.");
     }
   });
+
+  if (newContractBtn) {
+    newContractBtn.addEventListener("click", () => {
+      fileInput.value = "";
+      contractTextEl.value = "";
+      resultCard.classList.add("hidden");
+      resultContent.classList.add("hidden");
+      errorBox.classList.add("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  if (infoBtn) {
+    infoBtn.addEventListener("click", () => {
+      const footer = document.querySelector(".app-footer");
+      if (footer) {
+        footer.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  }
+
 });
