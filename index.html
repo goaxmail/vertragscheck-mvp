@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>VertragsCheck – KI Vertrags-Erklärer</title>
+    <link rel="manifest" href="manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Schriftart Inter -->
@@ -711,5 +712,12 @@
   </div>
 
   <script src="script.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js');
+}
+</script>
+
 </body>
 </html>
