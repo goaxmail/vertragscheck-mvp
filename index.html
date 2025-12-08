@@ -4,79 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#020617">
+  <meta name="theme-color" content="#050509">
   <link rel="stylesheet" href="style.css">
   <title>VertragsCheck</title>
 </head>
 <body>
-  <div class="app-root">
-    <main class="card">
-      <header class="card-header">
-        <p class="tagline">MVP • Prototyp</p>
-        <h1><span>Vertrags</span><span class="accent">Check</span></h1>
-        <p class="subtitle">Dein smarter Vertrags-Assistent für klare, einfache Erklärungen.</p>
-      </header>
+  <div class="app">
+    <header class="app-header">
+      <div class="app-header-left">
+        <div class="app-logo-dot"></div>
+        <div class="app-title-block">
+          <h1>VertragsCheck</h1>
+          <p>Dein smarter Vertrags-Assistent</p>
+        </div>
+      </div>
+      <button class="pro-pill" type="button">Pro</button>
+    </header>
 
-      <section class="card-section" id="tab-schnellcheck">
-        <h2 class="section-title">1. Schnell-Check</h2>
-        <p class="section-text">
-          Kopiere deinen Vertragstext hier hinein und starte eine erste Risiko‑Einschätzung.
-        </p>
-        <label class="field-label" for="contract">Vertragstext</label>
-        <textarea id="contract" placeholder="AGB, Vertragstext oder einzelne Klauseln hier einfügen…"></textarea>
-        <button id="analyze-btn" class="primary-btn" onclick="analyzeContract()">Analyse starten</button>
-        <p class="hint">Hinweis: Diese Demo ersetzt keine Rechtsberatung.</p>
-        <div id="output" class="output-card"></div>
+    <main class="app-main">
+      <section id="tab-quick" class="tab-view active">
+        <div class="card intro-card">
+          <h2>Schnell-Check</h2>
+          <p>Kopiere deinen Vertragstext hier hinein und starte eine erste Risiko-Einschätzung.</p>
+          <div class="pill-row">
+            <span class="pill">AGB</span>
+            <span class="pill">Mobilfunk</span>
+            <span class="pill">Versicherung</span>
+            <span class="pill pill-muted">Mehr bald</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <label for="contract" class="field-label">Vertragstext</label>
+          <textarea id="contract" placeholder="Vertragstext hier einfügen..."></textarea>
+          <button id="analyzeBtn" class="primary-btn" type="button">Analyse starten</button>
+          <div id="output" class="output-card">
+            <p class="output-placeholder">Hier erscheint das Ergebnis deiner Analyse.</p>
+          </div>
+          <p class="disclaimer">Hinweis: Diese Demo ersetzt keine Rechtsberatung.</p>
+        </div>
       </section>
 
-      <section class="card-section is-hidden" id="tab-vertraege">
-        <h2 class="section-title">Deine Verträge (Pro‑Version)</h2>
-        <p class="section-text">
-          In der Vollversion kannst du hier Verträge speichern, kategorisieren und Erinnerungen für Kündigungsfristen setzen.
-        </p>
-        <ul class="feature-list">
-          <li>🔔 Erinnerungen an Kündigungsfristen</li>
-          <li>📂 Kategorien wie Mobilfunk, Strom, Versicherungen</li>
-          <li>📑 Vertrags‑PDFs sicher ablegen (lokal & verschlüsselt geplant)</li>
-        </ul>
-        <p class="placeholder-note">
-          Aktuell ist dies ein Platzhalter‑Bereich für die kommende Pro‑Version.
-        </p>
+      <section id="tab-contracts" class="tab-view">
+        <div class="card">
+          <h2>Deine Verträge</h2>
+          <p>In der Vollversion kannst du hier Verträge speichern, kategorisieren und Erinnerungen für Kündigungsfristen setzen.</p>
+          <ul class="feature-list">
+            <li>🔔 Erinnerungen an Kündigungsfristen</li>
+            <li>📂 Kategorien wie Mobilfunk, Strom, Versicherungen</li>
+            <li>📎 Vertrags-PDFs sicher ablegen (lokal & verschlüsselt geplant)</li>
+          </ul>
+          <p class="muted">Aktuell ist dies ein Platzhalter-Bereich für die kommende Pro-Version.</p>
+        </div>
       </section>
 
-      <section class="card-section is-hidden" id="tab-profil">
-        <h2 class="section-title">Datenschutz & Pro‑Version</h2>
-        <p class="section-text">
-          VertragsCheck ist darauf ausgelegt, so wenige Daten wie möglich zu speichern
-          und dir maximale Kontrolle zu geben.
-        </p>
-        <ul class="feature-list">
-          <li>🛡️ Lokale Verarbeitung deiner Texte (geplant)</li>
-          <li>💳 Transparente Pro‑Preise ohne Abo‑Fallen</li>
-          <li>⚖️ Fokus auf DSGVO‑Konformität</li>
-        </ul>
-
-        <h3 class="section-subtitle">Geplante Pro‑Features</h3>
-        <ul class="feature-list">
-          <li>📊 Erweiterte Risiko‑Analyse mit Detail‑Scoring</li>
-          <li>📁 Mehrere Verträge speichern & vergleichen</li>
-          <li>📝 Export als PDF‑Report</li>
-        </ul>
-
-        <button class="secondary-btn pro-pill">Pro‑Version (coming soon)</button>
+      <section id="tab-profile" class="tab-view">
+        <div class="card">
+          <h2>Datenschutz & Pro-Version</h2>
+          <p>VertragsCheck ist darauf ausgelegt, so wenige Daten wie möglich zu speichern und dir maximale Kontrolle zu geben.</p>
+          <ul class="feature-list">
+            <li>🔐 Lokale Verarbeitung deiner Texte (geplant)</li>
+            <li>🧾 Transparente Pro-Preise ohne Abo-Fallen</li>
+            <li>🇪🇺 Fokus auf DSGVO-Konformität</li>
+          </ul>
+          <div class="pro-box">
+            <h3>Geplante Pro-Features</h3>
+            <ul>
+              <li>Erweiterte Risiko-Analyse mit Detail-Scoring</li>
+              <li>Mehrere Verträge speichern & vergleichen</li>
+              <li>Export als PDF-Report</li>
+            </ul>
+          </div>
+          <p class="muted small">Dies ist eine frühe Preview. Funktionen können sich noch ändern.</p>
+        </div>
       </section>
-
-      <footer class="app-footer">
-        <nav class="tabbar">
-          <button class="tab-btn is-active" data-tab="schnellcheck">Check</button>
-          <button class="tab-btn" data-tab="vertraege">Verträge</button>
-          <button class="tab-btn" data-tab="profil">Pro & Datenschutz</button>
-        </nav>
-        <p class="footer-meta">
-          VertragsCheck – MVP‑Prototyp. Diese Version speichert keine eingegebenen Daten.
-        </p>
-      </footer>
     </main>
+
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="quick" type="button">
+        <span class="tab-icon">🔍</span>
+        <span class="tab-label">Schnell-Check</span>
+      </button>
+      <button class="tab-btn" data-tab="contracts" type="button">
+        <span class="tab-icon">📄</span>
+        <span class="tab-label">Verträge</span>
+      </button>
+      <button class="tab-btn" data-tab="profile" type="button">
+        <span class="tab-icon">👤</span>
+        <span class="tab-label">Profil</span>
+      </button>
+    </nav>
+
+    <footer class="app-footer">
+      <span>© 2025 VertragsCheck</span>
+      <span class="footer-dot"></span>
+      <span>Preview-Build</span>
+    </footer>
   </div>
   <script src="script.js"></script>
 </body>
