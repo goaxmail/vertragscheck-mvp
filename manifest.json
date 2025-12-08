@@ -2,10 +2,9 @@
   "name": "VertragsCheck",
   "short_name": "VertragsCheck",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
   "icons": [
     {
       "src": "/assets/icons/icon-192.png",

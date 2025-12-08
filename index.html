@@ -1,723 +1,106 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>VertragsCheck – KI Vertrags-Erklärer</title>
-    <link rel="manifest" href="manifest.json" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Schriftart Inter -->
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    :root {
-      --bg: #0b1020;
-      --bg-card: #151a2a;
-      --border-card: #252b3d;
-      --accent: #3b82f6;
-      --accent-dark: #1d4ed8;
-      --accent-soft: #60a5fa;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --text-soft: #cbd5f5;
-      --danger: #ef4444;
-      --danger-soft: #fee2e2;
-      --success: #22c55e;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #020617 0, #020617 55%, #020617 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-
-    /* Smartphone-Frame */
-    .app {
-      width: 390px; /* typische Handy-Breite */
-      max-width: 100%;
-      min-height: 780px;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #020617 100%);
-      border-radius: 32px;
-      padding: 22px 18px 18px;
-      box-shadow:
-        0 18px 40px rgba(0, 0, 0, 0.75),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .app-header {
-      text-align: center;
-      margin-bottom: 14px;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      color: #f9fafb;
-    }
-
-    .logo span {
-      color: var(--accent-soft);
-    }
-
-    .subtitle {
-      margin-top: 6px;
-      color: var(--text-soft);
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .app-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow: hidden;
-    }
-
-    .card {
-      background: radial-gradient(circle at top left, #1f2937 0, #0b1120 45%, #020617 100%);
-      border-radius: 20px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      padding: 16px;
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.75);
-    }
-
-    .card h2 {
-      font-size: 15px;
-      font-weight: 600;
-      margin: 0 0 6px;
-      color: #e5e7f5;
-    }
-
-    .hint {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 11px;
-      line-height: 1.4;
-    }
-
-    .file-label {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border-radius: 999px;
-      padding: 9px 14px;
-      border: 1px dashed rgba(148, 163, 184, 0.6);
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--text-main);
-      font-size: 13px;
-      cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease,
-                  transform 0.05s ease, box-shadow 0.15s ease;
-    }
-
-    .file-label:hover {
-      background: #020617;
-      border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
-      transform: translateY(-1px);
-    }
-
-    .file-label input {
-      display: none;
-    }
-
-    .divider {
-      margin: 12px 0;
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      position: relative;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      width: 35%;
-      height: 1px;
-      background: rgba(55, 65, 81, 0.9);
-    }
-
-    .divider::before {
-      left: 0;
-    }
-
-    .divider::after {
-      right: 0;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 130px;
-      max-height: 220px;
-      resize: vertical;
-      border-radius: 14px;
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--text-main);
-      padding: 9px 11px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-
-    textarea::placeholder {
-      color: #4b5563;
-    }
-
-    textarea:focus {
-      border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
-      background: #020617;
-    }
-
-    .primary-btn,
-    .secondary-btn {
-      border-radius: 999px;
-      border: none;
-      padding: 10px 16px;
-      font-size: 13px;
-      cursor: pointer;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: background 0.15s ease, transform 0.05s ease,
-                  box-shadow 0.15s ease, opacity 0.1s ease;
-    }
-
-    .primary-btn {
-      margin-top: 10px;
-      background: linear-gradient(140deg, #3b82f6, #1d4ed8);
-      color: white;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
-      width: 100%;
-      justify-content: center;
-    }
-
-    .primary-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
-    }
-
-    .primary-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.55);
-    }
-
-    .primary-btn:disabled {
-      opacity: 0.7;
-      cursor: default;
-      box-shadow: none;
-    }
-
-    .secondary-btn {
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--text-main);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      padding-inline: 14px;
-      font-size: 12px;
-    }
-
-    .secondary-btn:hover {
-      background: #020617;
-    }
-
-    .privacy-note {
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .privacy-note::before {
-      content: "🔒";
-      font-size: 11px;
-      opacity: 0.9;
-    }
-
-    .result-card {
-      margin-top: 8px;
-    }
-
-    .result-card h2 {
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #e5e7f5;
-    }
-
-    .result-section {
-      margin-bottom: 10px;
-    }
-
-    .result-section h3 {
-      font-size: 12px;
-      margin: 0 0 4px;
-      font-weight: 600;
-      color: #e5e7f5;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 4px;
-    }
-
-    .info-pill {
-      padding: 6px 8px;
-      border-radius: 12px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .info-pill .label {
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-
-    .info-pill .value {
-      font-size: 12px;
-    }
-
-    .plain-text {
-      font-size: 12px;
-      color: var(--text-main);
-      line-height: 1.4;
-    }
-
-    .risks-list {
-      list-style: none;
-      padding-left: 16px;
-      margin: 0;
-      font-size: 12px;
-    }
-
-    .risks-list li::before {
-      content: "• ";
-      margin-left: -10px;
-      margin-right: 4px;
-      color: var(--danger);
-    }
-
-    .risks-list li {
-      margin-bottom: 3px;
-    }
-
-    .action-section textarea {
-      min-height: 100px;
-      max-height: 180px;
-      font-size: 12px;
-    }
-
-    .action-buttons {
-      margin-top: 6px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .loading {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
-      background: rgba(15, 23, 42, 0.9);
-      border-radius: 12px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-
-    .spinner {
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      border: 2px solid rgba(55, 65, 81, 0.9);
-      border-top-color: var(--accent-soft);
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .error-box {
-      padding: 6px 8px;
-      border-radius: 10px;
-      background: var(--danger-soft);
-      color: #7f1d1d;
-      font-size: 11px;
-      margin-bottom: 8px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .app-footer {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 10px;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-
-    /* Views for tab navigation */
-    .view {
-      display: none;
-    }
-
-    .view.view-active {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      height: 100%;
-    }
-
-    /* Bottom tab navigation */
-    .tab-bar {
-      margin-top: 10px;
-      padding: 6px 10px;
-      background: linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(15, 23, 42, 0.98));
-      border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.85);
-      display: flex;
-      gap: 6px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
-    }
-
-    .tab-btn {
-      flex: 1;
-      border: none;
-      border-radius: 999px;
-      padding: 6px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      background: transparent;
-      color: var(--text-muted);
-      transition:
-        background 0.15s ease,
-        color 0.15s ease,
-        transform 0.05s ease,
-        box-shadow 0.15s ease,
-        opacity 0.1s ease;
-    }
-
-    .tab-btn span {
-      line-height: 1;
-    }
-
-    .tab-btn-active {
-      background: linear-gradient(140deg, #3b82f6, #1d4ed8);
-      color: #f9fafb;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
-      opacity: 1;
-    }
-
-    .tab-btn-active span {
-      font-weight: 600;
-    }
-
-    /* Simple bullet list for info cards */
-    .bullet-list {
-      margin: 0;
-      padding-left: 16px;
-      font-size: 12px;
-      color: var(--text-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .bullet-list li {
-      margin-bottom: 2px;
-    }
-
-    /* Pricing layout */
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .pricing-card {
-      border-radius: 16px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background: rgba(15, 23, 42, 0.95);
-      padding: 10px;
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .pricing-card-pro {
-      border-color: rgba(59, 130, 246, 0.9);
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
-    }
-
-    .pill-label {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      color: var(--text-soft);
-    }
-
-    .pricing-card-pro .pill-label {
-      background: radial-gradient(circle at top, var(--accent-soft), var(--accent-dark));
-      color: #f9fafb;
-      border-color: transparent;
-    }
-
-    .pricing-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .pricing-list li {
-      position: relative;
-      padding-left: 12px;
-    }
-
-    .pricing-list li::before {
-      content: "•";
-      position: absolute;
-      left: 2px;
-      top: 0;
-      color: var(--accent-soft);
-    }
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#050509">
+  <link rel="stylesheet" href="style.css">
+  <title>VertragsCheck</title>
 </head>
 <body>
   <div class="app">
     <header class="app-header">
-      <div class="logo">Vertrags<span>Check</span></div>
-      <p class="subtitle">
-        Lade deinen Vertrag hoch oder füge Text ein – die KI erklärt dir alles in Klartext.
-      </p>
+      <div class="app-header-left">
+        <div class="app-logo-dot"></div>
+        <div class="app-title-block">
+          <h1>VertragsCheck</h1>
+          <p>Dein smarter Vertrags-Assistent</p>
+        </div>
+      </div>
+      <button class="pro-pill" type="button">Pro</button>
     </header>
 
     <main class="app-main">
-
-      <div id="view-check" class="view view-active">
-<section class="card upload-card">
-        <h2>1. Vertrag eingeben</h2>
-        <p class="hint">
-          Für das MVP kannst du deinen Vertragstext hier einfügen oder eine <strong>.txt</strong>-Datei hochladen.
-          PDF/Foto-Unterstützung kann später ergänzt werden (z.B. mit OCR).
-        </p>
-
-        <label class="file-label">
-          <input type="file" id="fileInput" accept=".txt" />
-          <span>📄 Text-Datei wählen (.txt)</span>
-        </label>
-
-        <div class="divider">oder</div>
-
-        <textarea id="contractText" placeholder="Vertragstext hier einfügen..."></textarea>
-
-        <button id="analyzeBtn" class="primary-btn">Vertrag analysieren</button>
-
-        <p class="privacy-note">
-          Wir speichern deine Daten nicht. Alles wird nur für diese Analyse verwendet.
-        </p>
-      </section>
-
-      <section class="card result-card hidden" id="resultCard">
-        <h2>2. Analyse-Ergebnis</h2>
-
-        <div id="loading" class="loading hidden">
-          <div class="spinner"></div>
-          <p>Dein Vertrag wird analysiert...</p>
-        </div>
-
-        <div id="errorBox" class="error-box hidden"></div>
-
-        <div id="resultContent" class="result-content hidden">
-          <section class="result-section">
-            <h3>Überblick</h3>
-            <div class="grid">
-              <div class="info-pill">
-                <span class="label">Vertragsart</span>
-                <span class="value" id="contractType">–</span>
-              </div>
-              <div class="info-pill">
-                <span class="label">Monatliche Kosten</span>
-                <span class="value" id="monthlyCost">–</span>
-              </div>
-              <div class="info-pill">
-                <span class="label">Laufzeit</span>
-                <span class="value" id="term">–</span>
-              </div>
-              <div class="info-pill">
-                <span class="label">Kündigungsfrist</span>
-                <span class="value" id="cancellationPeriod">–</span>
-              </div>
-              <div class="info-pill">
-                <span class="label">Verlängerung</span>
-                <span class="value" id="renewal">–</span>
-              </div>
-            </div>
-          </section>
-
-          <section class="result-section">
-            <h3>Klartext-Erklärung</h3>
-            <p id="plainExplanation" class="plain-text"></p>
-          </section>
-
-          <section class="result-section">
-            <h3>Risiken & Hinweise</h3>
-            <ul id="risksList" class="risks-list"></ul>
-          </section>
-
-          <section class="result-section">
-            <h3>Kündigungsstatus</h3>
-            <p id="cancellationStatus" class="plain-text"></p>
-          </section>
-
-          <section class="result-section action-section">
-            <h3>Kündigungsschreiben</h3>
-            <textarea id="terminationLetter" readonly></textarea>
-            <div class="action-buttons">
-              <button id="copyLetterBtn" class="secondary-btn">Text kopieren</button>
-            </div>
-          </section>
-        </div>
-      </section>
-      </div>
-
-
-      <div id="view-privacy" class="view">
-        <section class="card">
-          <h2>Datenschutz &amp; KI-Nutzung</h2>
-          <p class="hint">Kurz &amp; verständlich erklärt, was mit deinen Daten passiert.</p>
-          <ul class="bullet-list">
-            <li>✅ Deine Vertragsdaten werden nur für diese Analyse verwendet.</li>
-            <li>✅ Im aktuellen MVP speichern wir deine Verträge nicht dauerhaft.</li>
-            <li>✅ Es gibt keine Werbung und keinen Verkauf deiner Daten.</li>
-            <li>ℹ️ Die Analyse läuft aktuell über die OpenAI-API als Auftragsverarbeiter.</li>
-            <li>⚠️ Dies ersetzt keine Rechtsberatung, sondern unterstützt dein Verständnis.</li>
-          </ul>
-        </section>
-
-        <section class="card">
-          <h2>Deine Kontrolle</h2>
-          <p class="hint">Du entscheidest, welche Verträge du analysieren lässt.</p>
-          <ul class="bullet-list">
-            <li>Du kannst sensible Daten im Vertrag vor dem Einfügen anonymisieren.</li>
-            <li>Sende keine unnötigen personenbezogenen Daten, wenn sie für die Prüfung nicht relevant sind.</li>
-          </ul>
-        </section>
-      </div>
-
-
-      <div id="view-pricing" class="view">
-        <section class="card">
-          <h2>Free vs. Pro</h2>
-          <p class="hint">So könnte das Geschäftsmodell von VertragsCheck aussehen – transparent und ohne Datenverkauf.</p>
-          <div class="pricing-grid">
-            <div class="pricing-card">
-              <div class="pill-label">Free (MVP)</div>
-              <ul class="pricing-list">
-                <li>✅ Vertragsanalyse per Copy &amp; Paste</li>
-                <li>✅ Risiko-Übersicht &amp; Klartext-Erklärung</li>
-                <li>✅ Voll nutzbar ohne Registrierung</li>
-              </ul>
-            </div>
-            <div class="pricing-card pricing-card-pro">
-              <div class="pill-label">Pro (geplant)</div>
-              <ul class="pricing-list">
-                <li>✨ Unbegrenzte Analysen pro Monat</li>
-                <li>✨ PDF-Upload mit Texterkennung (OCR)</li>
-                <li>✨ Vertrags-Historie mit Zusammenfassungen</li>
-                <li>✨ Erweiterte Checks &amp; optionale Erinnerungen</li>
-              </ul>
-            </div>
+      <section id="tab-quick" class="tab-view active">
+        <div class="card intro-card">
+          <h2>Schnell-Check</h2>
+          <p>Kopiere deinen Vertragstext hier hinein und starte eine erste Risiko-Einschätzung.</p>
+          <div class="pill-row">
+            <span class="pill">AGB</span>
+            <span class="pill">Mobilfunk</span>
+            <span class="pill">Versicherung</span>
+            <span class="pill pill-muted">Mehr bald</span>
           </div>
-          <p class="hint">Wichtig: Einnahmen sollen später ausschließlich über Pro-Abos kommen – nicht über die Nutzung oder Weitergabe deiner Daten.</p>
-        </section>
+        </div>
 
-        <section class="card">
-          <h2>Früher Zugang &amp; Feedback</h2>
-          <p class="hint">
-            Dieses MVP zeigt Investoren und Nutzer:innen, wie VertragsCheck funktionieren soll.
-            Später kann hier z. B. ein Early-Access-Formular oder Login-Link für Pro stehen.
-          </p>
-        </section>
-      </div>
+        <div class="card">
+          <label for="contract" class="field-label">Vertragstext</label>
+          <textarea id="contract" placeholder="Vertragstext hier einfügen..."></textarea>
+          <button id="analyzeBtn" class="primary-btn" type="button">Analyse starten</button>
+          <div id="output" class="output-card">
+            <p class="output-placeholder">Hier erscheint das Ergebnis deiner Analyse.</p>
+          </div>
+          <p class="disclaimer">Hinweis: Diese Demo ersetzt keine Rechtsberatung.</p>
+        </div>
+      </section>
 
+      <section id="tab-contracts" class="tab-view">
+        <div class="card">
+          <h2>Deine Verträge</h2>
+          <p>In der Vollversion kannst du hier Verträge speichern, kategorisieren und Erinnerungen für Kündigungsfristen setzen.</p>
+          <ul class="feature-list">
+            <li>🔔 Erinnerungen an Kündigungsfristen</li>
+            <li>📂 Kategorien wie Mobilfunk, Strom, Versicherungen</li>
+            <li>📎 Vertrags-PDFs sicher ablegen (lokal & verschlüsselt geplant)</li>
+          </ul>
+          <p class="muted">Aktuell ist dies ein Platzhalter-Bereich für die kommende Pro-Version.</p>
+        </div>
+      </section>
+
+      <section id="tab-profile" class="tab-view">
+        <div class="card">
+          <h2>Datenschutz & Pro-Version</h2>
+          <p>VertragsCheck ist darauf ausgelegt, so wenige Daten wie möglich zu speichern und dir maximale Kontrolle zu geben.</p>
+          <ul class="feature-list">
+            <li>🔐 Lokale Verarbeitung deiner Texte (geplant)</li>
+            <li>🧾 Transparente Pro-Preise ohne Abo-Fallen</li>
+            <li>🇪🇺 Fokus auf DSGVO-Konformität</li>
+          </ul>
+          <div class="pro-box">
+            <h3>Geplante Pro-Features</h3>
+            <ul>
+              <li>Erweiterte Risiko-Analyse mit Detail-Scoring</li>
+              <li>Mehrere Verträge speichern & vergleichen</li>
+              <li>Export als PDF-Report</li>
+            </ul>
+          </div>
+          <p class="muted small">Dies ist eine frühe Preview. Funktionen können sich noch ändern.</p>
+        </div>
+      </section>
     </main>
 
-    
     <nav class="tab-bar">
-      <button class="tab-btn tab-btn-active" data-view="view-check">
-        🏠 <span>Check</span>
+      <button class="tab-btn active" data-tab="quick" type="button">
+        <span class="tab-icon">🔍</span>
+        <span class="tab-label">Schnell-Check</span>
       </button>
-      <button class="tab-btn" data-view="view-privacy">
-        🔒 <span>Datenschutz</span>
+      <button class="tab-btn" data-tab="contracts" type="button">
+        <span class="tab-icon">📄</span>
+        <span class="tab-label">Verträge</span>
       </button>
-      <button class="tab-btn" data-view="view-pricing">
-        💎 <span>Pro &amp; Preise</span>
+      <button class="tab-btn" data-tab="profile" type="button">
+        <span class="tab-icon">👤</span>
+        <span class="tab-label">Profil</span>
       </button>
     </nav>
 
-<footer class="app-footer">
-      <p>VertragsCheck – MVP-Prototyp. KI läuft über die OpenAI-API (API-Key als Umgebungsvariable).</p>
-      <p>Hinweis: Dies ersetzt keine Rechtsberatung, sondern hilft dir, Verträge besser zu verstehen.</p>
+    <footer class="app-footer">
+      <span>© 2025 VertragsCheck</span>
+      <span class="footer-dot"></span>
+      <span>Preview-Build</span>
     </footer>
   </div>
-
   <script src="script.js"></script>
-
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js');
-}
-</script>
-
 </body>
 </html>
