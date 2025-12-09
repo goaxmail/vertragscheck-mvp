@@ -456,3 +456,94 @@ textarea:focus {
     padding-inline: 10px;
   }
 }
+
+/* Vertragsliste */
+
+.contracts-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contract-card {
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.contract-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.contract-card-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.contract-card-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.contract-card-risk {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.contract-card-risk.risk-low {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+}
+
+.contract-card-risk.risk-medium {
+  background: rgba(250, 204, 21, 0.16);
+  color: #facc15;
+}
+
+.contract-card-risk.risk-high {
+  background: rgba(248, 113, 113, 0.16);
+  color: #fb7185;
+}
+
+.contract-card-summary {
+  font-size: 12px;
+  margin: 0 0 4px;
+}
+
+.contract-card-snippet {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.contract-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.contract-card-btn {
+  border-radius: var(--radius-pill);
+  border: none;
+  padding: 4px 9px;
+  font-size: 11px;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+}
+
+.contract-card-btn.delete {
+  border-color: rgba(248, 113, 113, 0.6);
+  color: #fecaca;
+}
