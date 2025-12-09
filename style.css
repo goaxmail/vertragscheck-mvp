@@ -213,6 +213,14 @@ textarea:focus {
   cursor: default;
 }
 
+/* Limit info */
+
+.limit-info {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 /* Output */
 
 .output-card {

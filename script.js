@@ -1,10 +1,52 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+  const DAILY_LIMIT = 3;
+  const STORAGE_KEY = "vc_analysis_usage";
+
   const tabButtons = document.querySelectorAll(".tab-btn");
   const tabViews = document.querySelectorAll(".tab-view");
   const analyzeBtn = document.getElementById("analyzeBtn");
   const contractInput = document.getElementById("contract");
   const output = document.getElementById("output");
+  const limitInfo = document.getElementById("limitInfo");
+
+  function todayKey() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function loadUsage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return { date: todayKey(), count: 0 };
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || parsed.date !== todayKey()) {
+        return { date: todayKey(), count: 0 };
+      }
+      return { date: parsed.date, count: Number(parsed.count) || 0 };
+    } catch (e) {
+      return { date: todayKey(), count: 0 };
+    }
+  }
+
+  function saveUsage(usage) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(usage));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function updateLimitInfo() {
+    if (!limitInfo) return;
+    const usage = loadUsage();
+    if (usage.count >= DAILY_LIMIT) {
+      limitInfo.textContent = `Tageslimit erreicht: ${usage.count} von ${DAILY_LIMIT} Analysen genutzt.`;
+    } else {
+      limitInfo.textContent = `Heutige Analysen: ${usage.count} von ${DAILY_LIMIT}.`;
+    }
+  }
 
   function setActiveTab(tabKey) {
     tabButtons.forEach((btn) => {
@@ -25,6 +67,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function analyzeContract() {
+    const usage = loadUsage();
+    if (usage.count >= DAILY_LIMIT) {
+      if (output) {
+        output.innerHTML = `
+          <p class="risk-summary">
+            Du hast dein Tageskontingent von ${DAILY_LIMIT} Analysen bereits genutzt.
+          </p>
+          <p class="disclaimer">
+            Für eine häufigere Nutzung ist eine erweiterte Pro-Version von VertragsCheck geplant.
+          </p>
+        `;
+      }
+      updateLimitInfo();
+      return;
+    }
+
     const text = (contractInput?.value || "").trim();
     if (!output) return;
 
@@ -32,6 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
       output.innerHTML = '<p class="output-placeholder">Bitte füge zuerst einen Vertragstext ein.</p>';
       return;
     }
+
+    const newUsage = { date: todayKey(), count: usage.count + 1 };
+    saveUsage(newUsage);
+    updateLimitInfo();
 
     if (analyzeBtn) {
       analyzeBtn.disabled = true;
@@ -143,4 +205,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   setActiveTab("quick");
+  updateLimitInfo();
 });

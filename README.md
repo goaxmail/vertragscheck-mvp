@@ -1,11 +1,6 @@
-# VertragsCheck – Pro-Analyse v1
+# VertragsCheck – Analyse-Limit v2
 
-Dieser Build enthält:
-
-- Modernes UI mit Tabs (Schnell-Check, Verträge, Profil)
-- Vertragstext-Auswertung über OpenAI
-- Soft-Paywall: nur ein Teil der Hinweise ist sichtbar, zusätzliche Details sind für Pro vorgesehen
-- Backend liefert bereits strukturierte Themen-Blöcke unter `sections` (Laufzeit, Kosten, etc.) für zukünftige Pro-Features
-- PWA-Basis (Manifest + Service Worker)
-
-In Vercel muss die Umgebungsvariable `OPENAI_API_KEY` gesetzt sein.
+- 3 Analysen pro Tag & Gerät (LocalStorage)
+- Soft-Paywall im Ergebnis
+- Strukturierte Analyse (sections) im Backend
+- PWA-Basis
