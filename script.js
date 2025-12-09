@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
   const tabButtons = document.querySelectorAll(".tab-btn");
   const tabViews = document.querySelectorAll(".tab-view");
@@ -23,64 +24,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  
-  function analyzeContract() {
+  async function analyzeContract() {
     const text = (contractInput?.value || "").trim();
     if (!output) return;
 
     if (!text) {
       output.innerHTML = '<p class="output-placeholder">Bitte füge zuerst einen Vertragstext ein.</p>';
       return;
-    }
-
-    const normalized = text.toLowerCase();
-
-    const keywordRules = [
-      { key: "automatische verlängerung", score: 3, note: "Automatische Verlängerung kann zu langen Laufzeiten führen, wenn du die Kündigungsfrist verpasst." },
-      { key: "mindestvertragslaufzeit", score: 2, note: "Mindestvertragslaufzeit schränkt deine Flexibilität, schnell zu wechseln, deutlich ein." },
-      { key: "kündigungsfrist", score: 2, note: "Kündigungsfristen sollten klar und fair formuliert sein – sonst droht eine ungewollte Verlängerung." },
-      { key: "gebühr", score: 2, note: "Zusätzliche Gebühren können den Vertrag teurer machen als erwartet." },
-      { key: "bearbeitungsgebühr", score: 2, note: "Einmalige Bearbeitungsgebühren sind oft schwer nachzuvollziehen." },
-      { key: "schadensersatz", score: 2, note: "Schadensersatzklauseln können teuer werden, wenn sie sehr weit gefasst sind." },
-      { key: "widerrufsrecht", score: 1, note: "Das Widerrufsrecht ist wichtig – achte auf die genaue Frist und Bedingungen." },
-      { key: "bonität", score: 1, note: "Bonitätsklauseln betreffen deine Kreditwürdigkeit und sollten transparent sein." },
-      { key: "preisänderung", score: 2, note: "Preisänderungsklauseln können zukünftige Kosten erhöhen." },
-      { key: "indexierung", score: 2, note: "Indexierungen koppeln Preise an einen Index – das kann Vor- und Nachteile haben." }
-    ];
-
-    let score = 0;
-    const notes = [];
-
-    keywordRules.forEach((rule) => {
-      if (normalized.includes(rule.key)) {
-        score += rule.score;
-        notes.push(rule.note);
-      }
-    });
-
-    let level = "low";
-    let label = "Niedriges Vertragsrisiko (Demo)";
-    let summary = "Auf den ersten Blick wirkt dieser Vertrag relativ unkritisch. Einzelne Punkte solltest du trotzdem aufmerksam lesen.";
-    let badgeText = "Risiko-Level: niedrig";
-
-    if (score >= 4 && score <= 7) {
-      level = "medium";
-      label = "Mittleres Vertragsrisiko (Demo)";
-      summary = "Es gibt einige Stellen im Vertrag, die genauer geprüft werden sollten – insbesondere zu Laufzeit, Kündigung und Kosten.";
-      badgeText = "Risiko-Level: mittel";
-    } else if (score > 7) {
-      level = "high";
-      label = "Erhöhtes Vertragsrisiko (Demo)";
-      summary = "Der Vertrag enthält mehrere potenziell kritische Punkte. Lies alle Klauseln sehr genau und vergleiche gegebenenfalls Alternativen.";
-      badgeText = "Risiko-Level: erhöht";
-    }
-
-    if (notes.length === 0) {
-      notes.push(
-        "Prüfe besonders Laufzeit, Verlängerung und Kündigungsfristen – hier verstecken sich oft Nachteile.",
-        "Achte auf zusätzliche Gebühren oder Paketpreise, die erst im Kleingedruckten auftauchen.",
-        "Vergleiche den Vertrag mit ähnlichen Angeboten, um ein Gefühl für übliche Konditionen zu bekommen."
-      );
     }
 
     if (analyzeBtn) {
@@ -91,19 +41,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     output.innerHTML = '<p class="output-placeholder">Analyse läuft…</p>';
 
-    setTimeout(() => {
-      const listItems = notes
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) {
+        throw new Error("API error");
+      }
+
+      const data = await response.json();
+
+      const level = data.level || "unknown";
+      const summary = data.summary || "Es gab ein Problem bei der Analyse oder es liegen zu wenige Informationen vor.";
+      const points = Array.isArray(data.points) && data.points.length > 0
+        ? data.points
+        : [
+            "Prüfe Laufzeit, automatische Verlängerung und Kündigungsfristen besonders sorgfältig.",
+            "Achte auf zusätzliche Gebühren oder versteckte Kosten im Kleingedruckten.",
+            "Vergleiche die Konditionen mit ähnlichen Angeboten, um ein Gefühl für das Marktüblich zu bekommen."
+          ];
+
+      let riskLevelClass = "risk-low";
+      let badgeText = "Risiko-Level: niedrig";
+
+      if (level === "medium") {
+        riskLevelClass = "risk-medium";
+        badgeText = "Risiko-Level: mittel";
+      } else if (level === "high") {
+        riskLevelClass = "risk-high";
+        badgeText = "Risiko-Level: erhöht";
+      } else if (level === "unknown") {
+        badgeText = "Risiko-Level: Demo";
+      }
+
+      const listItems = points
         .slice(0, 4)
         .map((note) => `<li>${note}</li>`)
         .join("");
 
       output.innerHTML = `
-        <div class="risk-header risk-${level}">
+        <div class="risk-header ${riskLevelClass}">
           <div>
-            <div class="risk-label">${label}</div>
+            <div class="risk-label">Erste Einschätzung (KI, Beta)</div>
             <div class="risk-badge">${badgeText}</div>
           </div>
-          <div class="risk-score">Demo</div>
+          <div class="risk-score">KI</div>
         </div>
         <p class="risk-summary">${summary}</p>
         <ul class="risk-points">
@@ -112,19 +99,27 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="pro-upsell">
           <div class="pro-upsell-tag">Pro (geplant)</div>
           <p class="pro-upsell-text">
-            In der Pro-Version soll die Analyse detaillierter werden – mit feineren Risiko-Scores,
-            Kapitel-Übersicht und Export als PDF-Report. Diese Demo speichert keine Daten.
+            In der Pro-Version soll die Analyse ausführlicher sein – mit feineren Risiko-Scores,
+            Kapitel-Übersicht und Export als PDF-Report. Diese Beta speichert deine Texte nicht dauerhaft.
           </p>
         </div>
       `;
-
+    } catch (err) {
+      output.innerHTML = `
+        <p class="risk-summary">
+          Die Analyse ist aktuell nicht erreichbar. Bitte versuche es später erneut.
+        </p>
+        <p class="disclaimer">
+          Technischer Hinweis: Prüfe, ob dein API-Key korrekt hinterlegt ist oder kontaktiere den Betreiber der App.
+        </p>
+      `;
+    } finally {
       if (analyzeBtn) {
         analyzeBtn.disabled = false;
         analyzeBtn.classList.remove("loading");
         analyzeBtn.textContent = "Analyse starten";
       }
-    }, 900);
-  }
+    }
   }
 
   if (analyzeBtn) {
