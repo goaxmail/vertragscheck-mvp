@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     }
 
     const prompt = [
-      "Du bist ein Assistent, der Vertragsklauseln für Endverbraucher erklärt.",
+      "Du unterstützt Verbraucher dabei, Vertragsklauseln besser zu verstehen.",
       "Analysiere den folgenden Vertragstext grob auf Risiko für den Kunden.",
       "Gib eine knappe Einschätzung zurück – nur als JSON, kein Fließtext außen herum.",
       "",
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
         model: "gpt-4.1-mini",
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Du bist ein deutscher Vertrags-Assistent, der Verbrauchern bei der Einschätzung von Risiken hilft." },
+          { role: "system", content: "Du hilfst Verbrauchern, Verträge besser einzuschätzen. Sei neutral, klar und vorsichtig mit Formulierungen." },
           { role: "user", content: prompt }
         ]
       })

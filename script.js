@@ -57,60 +57,67 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
 
       const level = data.level || "unknown";
-      const summary = data.summary || "Es gab ein Problem bei der Analyse oder es liegen zu wenige Informationen vor.";
+      const summary = data.summary || "Es gab ein Problem bei der Auswertung oder es liegen zu wenige Informationen vor.";
       const points = Array.isArray(data.points) && data.points.length > 0
         ? data.points
         : [
             "Prüfe Laufzeit, automatische Verlängerung und Kündigungsfristen besonders sorgfältig.",
             "Achte auf zusätzliche Gebühren oder versteckte Kosten im Kleingedruckten.",
-            "Vergleiche die Konditionen mit ähnlichen Angeboten, um ein Gefühl für das Marktüblich zu bekommen."
+            "Vergleiche die Konditionen mit ähnlichen Angeboten, um ein Gefühl für das Übliche zu bekommen."
           ];
 
       let riskLevelClass = "risk-low";
-      let badgeText = "Risiko-Level: niedrig";
+      let badgeText = "Risiko-Einschätzung: niedrig";
 
       if (level === "medium") {
         riskLevelClass = "risk-medium";
-        badgeText = "Risiko-Level: mittel";
+        badgeText = "Risiko-Einschätzung: mittel";
       } else if (level === "high") {
         riskLevelClass = "risk-high";
-        badgeText = "Risiko-Level: erhöht";
+        badgeText = "Risiko-Einschätzung: erhöht";
       } else if (level === "unknown") {
-        badgeText = "Risiko-Level: Demo";
+        badgeText = "Risiko-Einschätzung: Demo";
       }
 
-      const listItems = points
-        .slice(0, 4)
+      const visiblePoints = points.slice(0, 3);
+      const hiddenCount = Math.max(points.length - visiblePoints.length, 0);
+
+      const listItems = visiblePoints
         .map((note) => `<li>${note}</li>`)
         .join("");
+
+      const lockedLine = hiddenCount > 0
+        ? `<li class="pro-locked">🔒 Weitere Hinweise und Details sind für VertragsCheck&nbsp;Pro vorgesehen.</li>`
+        : "";
 
       output.innerHTML = `
         <div class="risk-header ${riskLevelClass}">
           <div>
-            <div class="risk-label">Erste Einschätzung (KI, Beta)</div>
+            <div class="risk-label">Erste Einschätzung (Beta)</div>
             <div class="risk-badge">${badgeText}</div>
           </div>
-          <div class="risk-score">KI</div>
+          <div class="risk-score">Tool</div>
         </div>
         <p class="risk-summary">${summary}</p>
         <ul class="risk-points">
           ${listItems}
+          ${lockedLine}
         </ul>
         <div class="pro-upsell">
           <div class="pro-upsell-tag">Pro (geplant)</div>
           <p class="pro-upsell-text">
-            In der Pro-Version soll die Analyse ausführlicher sein – mit feineren Risiko-Scores,
-            Kapitel-Übersicht und Export als PDF-Report. Diese Beta speichert deine Texte nicht dauerhaft.
+            In der Pro-Version soll die Auswertung ausführlicher werden – mit feineren Risiko-Scores,
+            Kapitel-Übersicht und Export als PDF-Report. Diese Vorschau speichert deine Texte nicht dauerhaft.
           </p>
         </div>
       `;
     } catch (err) {
       output.innerHTML = `
         <p class="risk-summary">
-          Die Analyse ist aktuell nicht erreichbar. Bitte versuche es später erneut.
+          Die Auswertung ist aktuell nicht erreichbar. Bitte versuche es später erneut.
         </p>
         <p class="disclaimer">
-          Technischer Hinweis: Prüfe, ob dein API-Key korrekt hinterlegt ist oder kontaktiere den Betreiber der App.
+          Technischer Hinweis: Prüfe, ob der Server korrekt konfiguriert ist oder kontaktiere den Betreiber der App.
         </p>
       `;
     } finally {

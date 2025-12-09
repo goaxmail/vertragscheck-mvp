@@ -1,11 +1,10 @@
-# VertragsCheck – MVP
+# VertragsCheck – MVP mit Soft-Paywall
 
 Dieser Build enthält:
 
 - Modernes UI mit Tabs (Schnell-Check, Verträge, Profil)
-- Echten KI-Analyse-Endpunkt unter `/api/analyze`
-- PWA-Basis (manifest + Service Worker)
+- Auswertung des Vertragstextes über eine serverseitige Schnittstelle zu OpenAI
+- Soft-Paywall im Analyse-Output (ein Teil der Hinweise bleibt Pro vorbehalten)
+- PWA-Basis (Manifest + Service Worker)
 
-## OpenAI API Key
-
-Auf Vercel muss die Umgebungsvariable `OPENAI_API_KEY` gesetzt sein.
+In Vercel muss die Umgebungsvariable `OPENAI_API_KEY` gesetzt sein.
