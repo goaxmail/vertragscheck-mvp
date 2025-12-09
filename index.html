@@ -62,8 +62,8 @@
           <h2>Datenschutz & Pro-Version</h2>
           <p>VertragsCheck ist darauf ausgelegt, so wenige Daten wie möglich zu speichern und dir maximale Kontrolle zu geben.</p>
           <ul class="feature-list">
-            <li>🔒 Die Auswertung nutzt einen externen Dienstleister (OpenAI) zur automatisierten Textanalyse.</li>
-            <li>🗑 Deine eingegebenen Texte werden im MVP nicht dauerhaft gespeichert.</li>
+            <li>🔒 Die Auswertung nutzt einen externen Dienstleister zur automatisierten Textanalyse.</li>
+            <li>🗑 Deine eingegebenen Texte werden im MVP nicht dauerhaft auf einem Server gespeichert.</li>
             <li>⚖️ Fokus auf Transparenz und faire Pro-Preise – ohne Abo-Fallen.</li>
           </ul>
           <div class="hint-box">
@@ -93,6 +93,28 @@
       <span class="footer-dot"></span>
       <span>Preview-Build</span>
     </footer>
+
+    <div id="detailOverlay" class="detail-overlay" aria-hidden="true">
+      <div class="detail-backdrop"></div>
+      <div class="detail-panel">
+        <button id="detailCloseBtn" class="detail-close-btn" type="button">Zur Übersicht</button>
+        <div class="detail-header">
+          <div>
+            <div id="detailTitle" class="detail-title">Vertrag</div>
+            <div id="detailMeta" class="detail-meta">–</div>
+          </div>
+          <div id="detailRiskBadge" class="detail-risk-badge">Risiko</div>
+        </div>
+        <p id="detailSummary" class="detail-summary">
+          Zusammenfassung zum Vertrag.
+        </p>
+        <ul id="detailPoints" class="detail-points"></ul>
+        <div class="detail-section">
+          <div class="detail-section-label">Vertragstext</div>
+          <div id="detailFullText" class="detail-fulltext"></div>
+        </div>
+      </div>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>

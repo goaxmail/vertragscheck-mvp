@@ -13,6 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const contractsListEl = document.getElementById("contractsList");
   const contractsEmptyEl = document.getElementById("contractsEmpty");
 
+  const detailOverlay = document.getElementById("detailOverlay");
+  const detailCloseBtn = document.getElementById("detailCloseBtn");
+  const detailTitle = document.getElementById("detailTitle");
+  const detailMeta = document.getElementById("detailMeta");
+  const detailRiskBadge = document.getElementById("detailRiskBadge");
+  const detailSummary = document.getElementById("detailSummary");
+  const detailPoints = document.getElementById("detailPoints");
+  const detailFullText = document.getElementById("detailFullText");
+
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
   }
@@ -86,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const firstLine = text.split("\n").map(t => t.trim()).filter(Boolean)[0] || "Vertrag";
     const titleSnippet = firstLine.length > 60 ? firstLine.slice(0, 57) + "…" : firstLine;
-    const snippet = text.replace(/\s+/g, " ").trim().slice(0, 140);
+    const snippet = text.replace(/\s+/g, " ").trim().slice(0, 160);
 
     return {
       id,
@@ -99,6 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
       points,
       text
     };
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   function renderContracts() {
@@ -135,19 +153,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return `
           <article class="contract-card" data-id="${c.id}">
-            <div class="contract-card-header">
-              <div>
-                <div class="contract-card-title">${escapeHtml(c.title)}</div>
-                <div class="contract-card-meta">${escapeHtml(c.dateLabel)}</div>
+            <button class="contract-card-main" type="button">
+              <div class="contract-card-header">
+                <div>
+                  <div class="contract-card-title">${escapeHtml(c.title)}</div>
+                  <div class="contract-card-meta">${escapeHtml(c.dateLabel)}</div>
+                </div>
+                <div class="contract-card-risk ${riskClass}">${riskLabel}</div>
               </div>
-              <div class="contract-card-risk ${riskClass}">${riskLabel}</div>
-            </div>
-            <p class="contract-card-summary">${escapeHtml(safeSummary)}</p>
-            ${
-              safeSnippet
-                ? `<p class="contract-card-snippet">${escapeHtml(safeSnippet)}${c.snippet && c.snippet.length >= 140 ? "…" : ""}</p>`
-                : ""
-            }
+              <p class="contract-card-summary">${escapeHtml(safeSummary)}</p>
+              ${
+                safeSnippet
+                  ? `<p class="contract-card-snippet">${escapeHtml(safeSnippet)}${c.snippet && c.snippet.length >= 160 ? "…" : ""}</p>`
+                  : ""
+              }
+            </button>
             <div class="contract-card-actions">
               <button class="contract-card-btn delete" type="button">Löschen</button>
             </div>
@@ -158,8 +178,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     contractsListEl.innerHTML = itemsHtml;
 
-    contractsListEl.querySelectorAll(".contract-card-btn.delete").forEach((btn) => {
+    contractsListEl.querySelectorAll(".contract-card-main").forEach((btn) => {
       btn.addEventListener("click", () => {
+        const card = btn.closest(".contract-card");
+        if (!card) return;
+        const id = card.getAttribute("data-id");
+        if (!id) return;
+        openDetail(id);
+      });
+    });
+
+    contractsListEl.querySelectorAll(".contract-card-btn.delete").forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        event.stopPropagation();
         const card = btn.closest(".contract-card");
         if (!card) return;
         const id = card.getAttribute("data-id");
@@ -171,15 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderContracts();
       });
     });
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
   }
 
   function setActiveTab(tabKey) {
@@ -197,9 +219,79 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function openDetail(id) {
+    if (!detailOverlay) return;
+    const contracts = loadContracts();
+    const entry = contracts.find((c) => c.id === id);
+    if (!entry) return;
+
+    const level = entry.level || "unknown";
+    let riskLabel = "Risiko: k.A.";
+    let riskClass = "";
+    if (level === "low") {
+      riskLabel = "Risiko: niedrig";
+      riskClass = "risk-low";
+    } else if (level === "medium") {
+      riskLabel = "Risiko: mittel";
+      riskClass = "risk-medium";
+    } else if (level === "high") {
+      riskLabel = "Risiko: erhöht";
+      riskClass = "risk-high";
+    }
+
+    if (detailTitle) detailTitle.textContent = entry.title || "Vertrag";
+    if (detailMeta) detailMeta.textContent = entry.dateLabel || "";
+    if (detailRiskBadge) {
+      detailRiskBadge.textContent = riskLabel;
+      detailRiskBadge.classList.remove("risk-low", "risk-medium", "risk-high");
+      if (riskClass) {
+        detailRiskBadge.classList.add(riskClass);
+      }
+    }
+    if (detailSummary) {
+      detailSummary.textContent = entry.summary || "Keine Zusammenfassung verfügbar.";
+    }
+
+    if (detailPoints) {
+      const pts = Array.isArray(entry.points) ? entry.points : [];
+      detailPoints.innerHTML = pts
+        .slice(0, 8)
+        .map((p) => `<li>${escapeHtml(p)}</li>`)
+        .join("");
+    }
+
+    if (detailFullText) {
+      detailFullText.textContent = entry.text || "";
+    }
+
+    detailOverlay.classList.add("visible");
+    detailOverlay.setAttribute("aria-hidden", "false");
+  }
+
+  function closeDetail() {
+    if (!detailOverlay) return;
+    detailOverlay.classList.remove("visible");
+    detailOverlay.setAttribute("aria-hidden", "true");
+  }
+
+  if (detailCloseBtn) {
+    detailCloseBtn.addEventListener("click", () => {
+      closeDetail();
+    });
+  }
+
+  if (detailOverlay) {
+    detailOverlay.addEventListener("click", (event) => {
+      if (event.target === detailOverlay) {
+        closeDetail();
+      }
+    });
+  }
+
   tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const tabKey = btn.dataset.tab;
+      closeDetail();
       setActiveTab(tabKey);
     });
   });
@@ -283,8 +375,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const visiblePoints = effectivePoints.slice(0, 3);
-      const hiddenPointCount = Math.max(effectivePoints.length - visiblePoints.length, 0);
       const sectionCount = sections.length;
+      const hiddenPointCount = Math.max(effectivePoints.length - visiblePoints.length, 0);
       const hasProExtras = hiddenPointCount > 0 || sectionCount > 0;
 
       const listItems = visiblePoints
@@ -317,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // Nach erfolgreicher Analyse Vertrag speichern
       const contractEntry = createContractEntry({
         text,
         level,
@@ -327,7 +418,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const currentContracts = loadContracts();
       currentContracts.push(contractEntry);
       saveContracts(currentContracts);
-      // Liste aktualisieren, falls der Nutzer direkt in den Verträge-Tab wechselt
       renderContracts();
     } catch (err) {
       output.innerHTML = `
