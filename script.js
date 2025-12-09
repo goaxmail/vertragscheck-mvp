@@ -58,13 +58,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const level = data.level || "unknown";
       const summary = data.summary || "Es gab ein Problem bei der Auswertung oder es liegen zu wenige Informationen vor.";
-      const points = Array.isArray(data.points) && data.points.length > 0
-        ? data.points
-        : [
-            "Prüfe Laufzeit, automatische Verlängerung und Kündigungsfristen besonders sorgfältig.",
-            "Achte auf zusätzliche Gebühren oder versteckte Kosten im Kleingedruckten.",
-            "Vergleiche die Konditionen mit ähnlichen Angeboten, um ein Gefühl für das Übliche zu bekommen."
-          ];
+      const points = Array.isArray(data.points) ? data.points : [];
+      const sections = Array.isArray(data.sections) ? data.sections : [];
+
+      const baseFallbackPoints = [
+        "Prüfe Laufzeit, automatische Verlängerung und Kündigungsfristen besonders sorgfältig.",
+        "Achte auf zusätzliche Gebühren oder versteckte Kosten im Kleingedruckten.",
+        "Vergleiche die Konditionen mit ähnlichen Angeboten, um ein Gefühl für das Übliche zu bekommen."
+      ];
+
+      const effectivePoints = points.length > 0 ? points : baseFallbackPoints;
 
       let riskLevelClass = "risk-low";
       let badgeText = "Risiko-Einschätzung: niedrig";
@@ -79,15 +82,17 @@ document.addEventListener("DOMContentLoaded", () => {
         badgeText = "Risiko-Einschätzung: Demo";
       }
 
-      const visiblePoints = points.slice(0, 3);
-      const hiddenCount = Math.max(points.length - visiblePoints.length, 0);
+      const visiblePoints = effectivePoints.slice(0, 3);
+      const hiddenPointCount = Math.max(effectivePoints.length - visiblePoints.length, 0);
+      const sectionCount = sections.length;
+      const hasProExtras = hiddenPointCount > 0 || sectionCount > 0;
 
       const listItems = visiblePoints
         .map((note) => `<li>${note}</li>`)
         .join("");
 
-      const lockedLine = hiddenCount > 0
-        ? `<li class="pro-locked">🔒 Weitere Hinweise und Details sind für VertragsCheck&nbsp;Pro vorgesehen.</li>`
+      const lockedLine = hasProExtras
+        ? `<li class="pro-locked">🔒 Zusätzliche Hinweise und eine Detail-Auswertung nach Themen sind für VertragsCheck&nbsp;Pro vorgesehen.</li>`
         : "";
 
       output.innerHTML = `
@@ -106,8 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="pro-upsell">
           <div class="pro-upsell-tag">Pro (geplant)</div>
           <p class="pro-upsell-text">
-            In der Pro-Version soll die Auswertung ausführlicher werden – mit feineren Risiko-Scores,
-            Kapitel-Übersicht und Export als PDF-Report. Diese Vorschau speichert deine Texte nicht dauerhaft.
+            In der Pro-Version soll die Auswertung ausführlicher werden – mit Detail-Scores je Themenblock
+            (z.&nbsp;B. Laufzeit, Kündigung, Kosten, Haftung) und Export als PDF-Report. Diese Vorschau speichert deine Texte nicht dauerhaft.
           </p>
         </div>
       `;
@@ -133,11 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
     analyzeBtn.addEventListener("click", analyzeContract);
   }
 
-  // PWA / Service Worker
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/service-worker.js").catch(() => {});
   }
 
-  // Default tab
   setActiveTab("quick");
 });

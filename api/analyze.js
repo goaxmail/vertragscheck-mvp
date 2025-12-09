@@ -19,14 +19,28 @@ export default async function handler(req, res) {
     const prompt = [
       "Du unterstützt Verbraucher dabei, Vertragsklauseln besser zu verstehen.",
       "Analysiere den folgenden Vertragstext grob auf Risiko für den Kunden.",
-      "Gib eine knappe Einschätzung zurück – nur als JSON, kein Fließtext außen herum.",
+      "Gib eine strukturierte Einschätzung zurück – nur als JSON, kein Fließtext außen herum.",
       "",
       "Antwortformat (zwingend als JSON):",
       "{",
       '  "level": "low" | "medium" | "high",',
       '  "summary": "kurze Zusammenfassung in 1-3 Sätzen",',
-      '  "points": ["Stichpunkt 1", "Stichpunkt 2", "…"]',
+      '  "points": ["Stichpunkt 1", "Stichpunkt 2", "..."],',
+      '  "sections": [',
+      '    {',
+      '      "title": "Laufzeit & Kündigung",',
+      '      "risk": "low" | "medium" | "high",',
+      '      "notes": ["Hinweis 1", "Hinweis 2"]',
+      "    },",
+      "    {",
+      '      "title": "Kosten & Gebühren",',
+      '      "risk": "low" | "medium" | "high",',
+      '      "notes": ["Hinweis 1", "Hinweis 2"]',
+      "    }",
+      "  ]",
       "}",
+      "",
+      "Wenn bestimmte Themen nicht im Text vorkommen, kannst du die entsprechenden sections weglassen.",
       "",
       "Text:",
       text
@@ -68,7 +82,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       level: parsed.level || "unknown",
       summary: parsed.summary || "",
-      points: Array.isArray(parsed.points) ? parsed.points : []
+      points: Array.isArray(parsed.points) ? parsed.points : [],
+      sections: Array.isArray(parsed.sections) ? parsed.sections : []
     });
   } catch (err) {
     console.error("Handler error:", err);
