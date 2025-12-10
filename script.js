@@ -1,6 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const DAILY_LIMIT = 3;
+  const DEV_IGNORE_LIMIT = true; // Dev-Only: Limit deaktiviert. Vor Release auf false setzen oder entfernen.
   const STORAGE_KEY = "vc_analysis_usage";
 
   const tabButtons = document.querySelectorAll(".tab-btn");
@@ -41,7 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateLimitInfo() {
     if (!limitInfo) return;
     const usage = loadUsage();
-    if (usage.count >= DAILY_LIMIT) {
+    if (DEV_IGNORE_LIMIT) {
+      limitInfo.textContent = `Dev-Modus: ${usage.count} Analysen heute (Limit deaktiviert).`;
+    } else if (usage.count >= DAILY_LIMIT) {
       limitInfo.textContent = `Tageslimit erreicht: ${usage.count} von ${DAILY_LIMIT} Analysen genutzt.`;
     } else {
       limitInfo.textContent = `Heutige Analysen: ${usage.count} von ${DAILY_LIMIT}.`;
@@ -68,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function analyzeContract() {
     const usage = loadUsage();
-    if (usage.count >= DAILY_LIMIT) {
+    if (!DEV_IGNORE_LIMIT && usage.count >= DAILY_LIMIT) {
       if (output) {
         output.innerHTML = `
           <p class="risk-summary">
