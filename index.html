@@ -18,7 +18,11 @@
           <p class="app-subtitle">Dein smarter Vertrags-Assistent.</p>
         </div>
       </div>
-      <button class="pro-pill" type="button">PRO</button>
+      <div class="app-header-right">
+        <button class="pro-pill" type="button">PRO</button>
+        <!-- Dev-Only: Reset-Button für Tests. Vor Release entfernen. -->
+        <button id="devResetBtn" class="dev-reset-btn" type="button">Reset (Dev)</button>
+      </div>
     </header>
 
     <main class="app-main">
@@ -49,11 +53,15 @@
       <section id="tab-contracts" class="tab-view">
         <div class="card">
           <h2>Deine Verträge</h2>
-          <p>Hier siehst du eine Übersicht der lokal gespeicherten Verträge und Einschätzungen auf diesem Gerät.</p>
-          <div id="contractsEmpty" class="hint-box">
-            <p>Du hast noch keine Verträge gespeichert. Starte eine Analyse im Schnell-Check und speichere das Ergebnis.</p>
+          <p>In der geplanten Pro-Version kannst du hier Verträge speichern, kategorisieren und Erinnerungen für Kündigungsfristen setzen.</p>
+          <ul class="feature-list">
+            <li>🔔 Erinnerungen an Kündigungsfristen</li>
+            <li>📂 Kategorien wie Mobilfunk, Strom, Versicherung</li>
+            <li>🔐 Lokale Speicherung deiner Vertragsdaten (geplant)</li>
+          </ul>
+          <div class="hint-box">
+            <p>Aktuell ist dies ein Platzhalter für die kommende Pro-Version.</p>
           </div>
-          <div id="contractsList" class="contracts-list"></div>
         </div>
       </section>
 
@@ -62,8 +70,8 @@
           <h2>Datenschutz & Pro-Version</h2>
           <p>VertragsCheck ist darauf ausgelegt, so wenige Daten wie möglich zu speichern und dir maximale Kontrolle zu geben.</p>
           <ul class="feature-list">
-            <li>🔒 Die Auswertung nutzt einen externen Dienstleister zur automatisierten Textanalyse.</li>
-            <li>🗑 Deine eingegebenen Texte werden im MVP nicht dauerhaft auf einem Server gespeichert.</li>
+            <li>🔒 Die Auswertung nutzt einen externen Dienstleister (OpenAI) zur automatisierten Textanalyse.</li>
+            <li>🗑 Deine eingegebenen Texte werden im MVP nicht dauerhaft gespeichert.</li>
             <li>⚖️ Fokus auf Transparenz und faire Pro-Preise – ohne Abo-Fallen.</li>
           </ul>
           <div class="hint-box">
@@ -93,28 +101,6 @@
       <span class="footer-dot"></span>
       <span>Preview-Build</span>
     </footer>
-
-    <div id="detailOverlay" class="detail-overlay" aria-hidden="true">
-      <div class="detail-backdrop"></div>
-      <div class="detail-panel">
-        <button id="detailCloseBtn" class="detail-close-btn" type="button">Zur Übersicht</button>
-        <div class="detail-header">
-          <div>
-            <div id="detailTitle" class="detail-title">Vertrag</div>
-            <div id="detailMeta" class="detail-meta">–</div>
-          </div>
-          <div id="detailRiskBadge" class="detail-risk-badge">Risiko</div>
-        </div>
-        <p id="detailSummary" class="detail-summary">
-          Zusammenfassung zum Vertrag.
-        </p>
-        <ul id="detailPoints" class="detail-points"></ul>
-        <div class="detail-section">
-          <div class="detail-section-label">Vertragstext</div>
-          <div id="detailFullText" class="detail-fulltext"></div>
-        </div>
-      </div>
-    </div>
   </div>
   <script src="script.js"></script>
 </body>

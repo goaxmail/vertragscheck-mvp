@@ -1,8 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const DAILY_LIMIT = 3;
-  const STORAGE_KEY_USAGE = "vc_analysis_usage";
-  const STORAGE_KEY_CONTRACTS = "vc_saved_contracts";
+  const STORAGE_KEY = "vc_analysis_usage";
 
   const tabButtons = document.querySelectorAll(".tab-btn");
   const tabViews = document.querySelectorAll(".tab-view");
@@ -10,17 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const contractInput = document.getElementById("contract");
   const output = document.getElementById("output");
   const limitInfo = document.getElementById("limitInfo");
-  const contractsListEl = document.getElementById("contractsList");
-  const contractsEmptyEl = document.getElementById("contractsEmpty");
-
-  const detailOverlay = document.getElementById("detailOverlay");
-  const detailCloseBtn = document.getElementById("detailCloseBtn");
-  const detailTitle = document.getElementById("detailTitle");
-  const detailMeta = document.getElementById("detailMeta");
-  const detailRiskBadge = document.getElementById("detailRiskBadge");
-  const detailSummary = document.getElementById("detailSummary");
-  const detailPoints = document.getElementById("detailPoints");
-  const detailFullText = document.getElementById("detailFullText");
 
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -28,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadUsage() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY_USAGE);
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
         return { date: todayKey(), count: 0 };
       }
@@ -44,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function saveUsage(usage) {
     try {
-      localStorage.setItem(STORAGE_KEY_USAGE, JSON.stringify(usage));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(usage));
     } catch (e) {
       // ignore
     }
@@ -60,150 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function loadContracts() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY_CONTRACTS);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return [];
-      return parsed;
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function saveContracts(list) {
-    try {
-      localStorage.setItem(STORAGE_KEY_CONTRACTS, JSON.stringify(list));
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  function createContractEntry({ text, level, summary, points }) {
-    const now = new Date();
-    const id = `${now.getTime()}-${Math.random().toString(16).slice(2)}`;
-    const dateStr = now.toLocaleDateString("de-DE", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    });
-    const timeStr = now.toLocaleTimeString("de-DE", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-
-    const firstLine = text.split("\n").map(t => t.trim()).filter(Boolean)[0] || "Vertrag";
-    const titleSnippet = firstLine.length > 60 ? firstLine.slice(0, 57) + "…" : firstLine;
-    const snippet = text.replace(/\s+/g, " ").trim().slice(0, 160);
-
-    return {
-      id,
-      createdAt: now.toISOString(),
-      dateLabel: `${dateStr}, ${timeStr} Uhr`,
-      title: titleSnippet,
-      level,
-      summary,
-      snippet,
-      points,
-      text
-    };
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function renderContracts() {
-    if (!contractsListEl || !contractsEmptyEl) return;
-    const contracts = loadContracts();
-
-    if (!contracts.length) {
-      contractsEmptyEl.style.display = "block";
-      contractsListEl.innerHTML = "";
-      return;
-    }
-
-    contractsEmptyEl.style.display = "none";
-
-    const itemsHtml = contracts
-      .slice()
-      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
-      .map((c) => {
-        let riskClass = "";
-        let riskLabel = "Risiko: k.A.";
-        if (c.level === "low") {
-          riskClass = "risk-low";
-          riskLabel = "Risiko: niedrig";
-        } else if (c.level === "medium") {
-          riskClass = "risk-medium";
-          riskLabel = "Risiko: mittel";
-        } else if (c.level === "high") {
-          riskClass = "risk-high";
-          riskLabel = "Risiko: erhöht";
-        }
-
-        const safeSummary = c.summary || "Keine Zusammenfassung verfügbar.";
-        const safeSnippet = c.snippet || "";
-
-        return `
-          <article class="contract-card" data-id="${c.id}">
-            <button class="contract-card-main" type="button">
-              <div class="contract-card-header">
-                <div>
-                  <div class="contract-card-title">${escapeHtml(c.title)}</div>
-                  <div class="contract-card-meta">${escapeHtml(c.dateLabel)}</div>
-                </div>
-                <div class="contract-card-risk ${riskClass}">${riskLabel}</div>
-              </div>
-              <p class="contract-card-summary">${escapeHtml(safeSummary)}</p>
-              ${
-                safeSnippet
-                  ? `<p class="contract-card-snippet">${escapeHtml(safeSnippet)}${c.snippet && c.snippet.length >= 160 ? "…" : ""}</p>`
-                  : ""
-              }
-            </button>
-            <div class="contract-card-actions">
-              <button class="contract-card-btn delete" type="button">Löschen</button>
-            </div>
-          </article>
-        `;
-      })
-      .join("");
-
-    contractsListEl.innerHTML = itemsHtml;
-
-    contractsListEl.querySelectorAll(".contract-card-main").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const card = btn.closest(".contract-card");
-        if (!card) return;
-        const id = card.getAttribute("data-id");
-        if (!id) return;
-        openDetail(id);
-      });
-    });
-
-    contractsListEl.querySelectorAll(".contract-card-btn.delete").forEach((btn) => {
-      btn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const card = btn.closest(".contract-card");
-        if (!card) return;
-        const id = card.getAttribute("data-id");
-        if (!id) return;
-
-        const current = loadContracts();
-        const next = current.filter((c) => c.id !== id);
-        saveContracts(next);
-        renderContracts();
-      });
-    });
-  }
-
   function setActiveTab(tabKey) {
     tabButtons.forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.tab === tabKey);
@@ -213,85 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const isTarget = view.id === `tab-${tabKey}`;
       view.classList.toggle("active", isTarget);
     });
-
-    if (tabKey === "contracts") {
-      renderContracts();
-    }
-  }
-
-  function openDetail(id) {
-    if (!detailOverlay) return;
-    const contracts = loadContracts();
-    const entry = contracts.find((c) => c.id === id);
-    if (!entry) return;
-
-    const level = entry.level || "unknown";
-    let riskLabel = "Risiko: k.A.";
-    let riskClass = "";
-    if (level === "low") {
-      riskLabel = "Risiko: niedrig";
-      riskClass = "risk-low";
-    } else if (level === "medium") {
-      riskLabel = "Risiko: mittel";
-      riskClass = "risk-medium";
-    } else if (level === "high") {
-      riskLabel = "Risiko: erhöht";
-      riskClass = "risk-high";
-    }
-
-    if (detailTitle) detailTitle.textContent = entry.title || "Vertrag";
-    if (detailMeta) detailMeta.textContent = entry.dateLabel || "";
-    if (detailRiskBadge) {
-      detailRiskBadge.textContent = riskLabel;
-      detailRiskBadge.classList.remove("risk-low", "risk-medium", "risk-high");
-      if (riskClass) {
-        detailRiskBadge.classList.add(riskClass);
-      }
-    }
-    if (detailSummary) {
-      detailSummary.textContent = entry.summary || "Keine Zusammenfassung verfügbar.";
-    }
-
-    if (detailPoints) {
-      const pts = Array.isArray(entry.points) ? entry.points : [];
-      detailPoints.innerHTML = pts
-        .slice(0, 8)
-        .map((p) => `<li>${escapeHtml(p)}</li>`)
-        .join("");
-    }
-
-    if (detailFullText) {
-      detailFullText.textContent = entry.text || "";
-    }
-
-    detailOverlay.classList.add("visible");
-    detailOverlay.setAttribute("aria-hidden", "false");
-  }
-
-  function closeDetail() {
-    if (!detailOverlay) return;
-    detailOverlay.classList.remove("visible");
-    detailOverlay.setAttribute("aria-hidden", "true");
-  }
-
-  if (detailCloseBtn) {
-    detailCloseBtn.addEventListener("click", () => {
-      closeDetail();
-    });
-  }
-
-  if (detailOverlay) {
-    detailOverlay.addEventListener("click", (event) => {
-      if (event.target === detailOverlay) {
-        closeDetail();
-      }
-    });
   }
 
   tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const tabKey = btn.dataset.tab;
-      closeDetail();
       setActiveTab(tabKey);
     });
   });
@@ -375,8 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const visiblePoints = effectivePoints.slice(0, 3);
-      const sectionCount = sections.length;
       const hiddenPointCount = Math.max(effectivePoints.length - visiblePoints.length, 0);
+      const sectionCount = sections.length;
       const hasProExtras = hiddenPointCount > 0 || sectionCount > 0;
 
       const listItems = visiblePoints
@@ -408,17 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
           </p>
         </div>
       `;
-
-      const contractEntry = createContractEntry({
-        text,
-        level,
-        summary,
-        points: effectivePoints
-      });
-      const currentContracts = loadContracts();
-      currentContracts.push(contractEntry);
-      saveContracts(currentContracts);
-      renderContracts();
     } catch (err) {
       output.innerHTML = `
         <p class="risk-summary">
@@ -447,5 +206,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setActiveTab("quick");
   updateLimitInfo();
-  renderContracts();
 });
