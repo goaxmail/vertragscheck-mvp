@@ -1,129 +1,183 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B1020" />
   <title>VertragsCheck</title>
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#050509" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="app-header">
-      <div class="app-header-left">
-        <div class="app-logo-dot"></div>
-        <div class="app-title-block">
-          <h1 class="app-title">VertragsCheck</h1>
-          <p class="app-subtitle">Dein smarter Vertrags-Assistent.</p>
+  <div id="appShell">
+    <!-- Fixed Header -->
+    <header id="appHeader" class="glass">
+      <button id="backBtn" class="icon-btn" aria-label="Zur Übersicht" title="Zur Übersicht">
+        <span class="chev">←</span>
+      </button>
+
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true"></div>
+        <div class="brand-text">
+          <div class="brand-title">VertragsCheck</div>
+          <div class="brand-sub">Dein smarter Vertrags-Assistent.</div>
         </div>
       </div>
-      <div class="app-header-right">
-        <button class="pro-pill" type="button">PRO</button>
-        <button id="devResetBtn" class="dev-reset-btn" type="button">Reset (Dev)</button>
+
+      <div class="header-actions">
+        <button id="proBtn" class="pill pro">PRO</button>
+        <button id="devResetBtn" class="pill dev">Reset (Dev)</button>
       </div>
     </header>
 
-    <main class="app-main">
-      <!-- Schnell-Check -->
-      <section id="tab-quick" class="tab-view active">
-        <div class="card intro-card">
-          <h2>Schnell-Check</h2>
-          <p>Füge deinen Vertragstext unten ein und starte eine erste automatische Einschätzung – ideal für AGB, Mobilfunk, Versicherung und mehr.</p>
-          <div class="pill-row">
-            <span class="pill">AGB</span>
-            <span class="pill">Mobilfunk</span>
-            <span class="pill">Versicherung</span>
-            <span class="pill pill-muted">Mehr bald</span>
-          </div>
-        </div>
+    <!-- Scrollable Main -->
+    <main id="appMain">
+      <!-- TAB: Schnell-Check -->
+      <section id="tab-check" class="view active" aria-label="Schnell-Check">
+        <div class="card glass">
+          <div class="card-head">
+            <h2>Schnell-Check</h2>
+            <p class="muted">
+              Füge deinen Vertragstext unten ein und starte eine automatische Einschätzung – ideal für AGB, Mobilfunk, Versicherung und mehr.
+            </p>
 
-        <div class="card">
-          <label for="contract" class="field-label">Vertragstext</label>
-          <textarea id="contract" placeholder="Vertragstext hier einfügen..."></textarea>
-          <button id="analyzeBtn" class="primary-btn" type="button">Analyse starten</button>
-          <p id="limitInfo" class="limit-info"></p>
-          <div id="output" class="output-card">
-            <p class="output-placeholder">Hier erscheint das Ergebnis deiner Analyse.</p>
+            <div class="chips">
+              <button class="chip active" type="button">AGB</button>
+              <button class="chip" type="button">Mobilfunk</button>
+              <button class="chip" type="button">Versicherung</button>
+              <button class="chip" type="button">Mehr bald</button>
+            </div>
           </div>
-          <p class="disclaimer">Hinweis: Diese Version ist ein automatisiertes Demo-Tool und ersetzt keine Rechtsberatung.</p>
+
+          <div class="field">
+            <label for="contractText">Vertragstext</label>
+            <textarea id="contractText" placeholder="Vertragstext hier einfügen..."></textarea>
+          </div>
+
+          <button id="analyzeBtn" class="primary-btn">Analyse starten</button>
+
+          <div class="meta-row">
+            <div id="limitText" class="limit-text"></div>
+            <div id="devModeText" class="devmode-text"></div>
+          </div>
+
+          <div id="output" class="output glass">
+            <div class="output-title">
+              <span>Erste Einschätzung</span>
+              <span id="outputBadge" class="badge tool">Tool</span>
+            </div>
+            <div id="outputBody" class="output-body muted">Hier erscheint das Ergebnis deiner Analyse.</div>
+          </div>
+
+          <div class="fineprint muted">
+            Hinweis: Diese Version ersetzt keine Rechtsberatung.
+          </div>
         </div>
       </section>
 
-      <!-- Verträge -->
-      <section id="tab-contracts" class="tab-view">
-        <div class="card">
-          <h2>Deine Verträge</h2>
-          <p>Hier siehst du eine Übersicht der lokal gespeicherten Verträge und Einschätzungen auf diesem Gerät.</p>
-          <div id="contractsEmpty" class="hint-box">
-            <p>Du hast noch keine Verträge gespeichert. Starte eine Analyse im Schnell-Check und speichere das Ergebnis automatisch.</p>
+      <!-- TAB: Verträge -->
+      <section id="tab-contracts" class="view" aria-label="Verträge">
+        <div class="card glass">
+          <div class="card-head">
+            <h2>Deine Verträge</h2>
+            <p class="muted">Hier siehst du eine Übersicht der lokal gespeicherten Einschätzungen auf diesem Gerät.</p>
           </div>
+
+          <div id="contractsEmpty" class="empty-state glass">
+            <div class="empty-title">Noch keine Einträge</div>
+            <div class="muted">Starte eine Analyse im Schnell-Check. Danach erscheint sie hier automatisch.</div>
+          </div>
+
           <div id="contractsList" class="contracts-list"></div>
         </div>
       </section>
 
-      <!-- Profil / Datenschutz -->
-      <section id="tab-profile" class="tab-view">
-        <div class="card">
-          <h2>Datenschutz & Pro-Version</h2>
-          <p>VertragsCheck ist darauf ausgelegt, so wenige Daten wie möglich zu speichern und dir maximale Kontrolle zu geben.</p>
-          <ul class="feature-list">
-            <li>🔒 Die Auswertung nutzt einen externen Dienstleister zur automatisierten Textanalyse.</li>
-            <li>🗑 Deine eingegebenen Texte werden im MVP nicht dauerhaft auf einem Server gespeichert.</li>
-            <li>⚖️ Fokus auf Transparenz und faire Pro-Preise – ohne Abo-Fallen.</li>
-          </ul>
-          <div class="hint-box">
-            <p>Dies ist ein Prototyp. Die finale Version kann sich noch ändern. Bitte lies Verträge weiterhin vollständig und kritisch.</p>
+      <!-- TAB: Profil -->
+      <section id="tab-profile" class="view" aria-label="Profil">
+        <div class="card glass">
+          <div class="card-head">
+            <h2>Profil</h2>
+            <p class="muted">Einstellungen, Datenschutz und Pro (geplant).</p>
           </div>
+
+          <div class="settings">
+            <div class="setting glass">
+              <div class="setting-title">Datenschutz</div>
+              <div class="muted">Dokumente werden nur zur Analyse verarbeitet. (Speicherung: nur wenn du Analysen lokal ablegst.)</div>
+            </div>
+
+            <div class="setting glass">
+              <div class="setting-title">Pro (geplant)</div>
+              <ul class="muted">
+                <li>Mehr Analysen / höhere Textlänge</li>
+                <li>PDF-Upload (später)</li>
+                <li>Export / Erinnerungen</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DETAIL VIEW (Mobile-Screen, not modal) -->
+      <section id="tab-contract-detail" class="view" aria-label="Detailansicht">
+        <div class="card glass">
+          <div class="detail-head">
+            <div class="detail-title-row">
+              <h2 id="detailTitle">Vertrag</h2>
+              <span id="detailRisk" class="badge risk">Risiko</span>
+            </div>
+            <div id="detailMeta" class="muted small">—</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="detail-block">
+            <div class="block-title">Zusammenfassung</div>
+            <div id="detailSummary" class="detail-text">—</div>
+          </div>
+
+          <div class="detail-block">
+            <div class="block-title">Wichtige Punkte</div>
+            <ul id="detailBullets" class="detail-list"></ul>
+          </div>
+
+          <div class="detail-block">
+            <div class="block-title">Was bedeutet das für dich?</div>
+            <div id="detailMeaning" class="detail-text muted">
+              In Pro (geplant): konkrete Handlungsempfehlungen, Kündigungs-/Kosten-Hinweise und eine sauber strukturierte Kapitelübersicht.
+            </div>
+          </div>
+
+          <details class="detail-block">
+            <summary>Originaltext anzeigen</summary>
+            <pre id="detailRaw" class="raw"></pre>
+          </details>
         </div>
       </section>
     </main>
 
-    <!-- Tab-Bar -->
-    <nav class="tab-bar">
-      <button class="tab-btn active" data-tab="quick" type="button">
-        <span class="tab-icon">🔍</span>
-        <span class="tab-label">Schnell-Check</span>
+    <!-- Fixed Bottom Nav -->
+    <nav id="bottomNav" class="glass" aria-label="Navigation">
+      <button class="nav-btn active" data-tab="check" aria-label="Schnell-Check">
+        <span class="nav-ico">🔎</span>
+        <span class="nav-label">Schnell-Check</span>
       </button>
-      <button class="tab-btn" data-tab="contracts" type="button">
-        <span class="tab-icon">📄</span>
-        <span class="tab-label">Verträge</span>
+      <button class="nav-btn" data-tab="contracts" aria-label="Verträge">
+        <span class="nav-ico">📄</span>
+        <span class="nav-label">Verträge</span>
       </button>
-      <button class="tab-btn" data-tab="profile" type="button">
-        <span class="tab-icon">👤</span>
-        <span class="tab-label">Profil</span>
+      <button class="nav-btn" data-tab="profile" aria-label="Profil">
+        <span class="nav-ico">👤</span>
+        <span class="nav-label">Profil</span>
       </button>
     </nav>
 
-    <footer class="app-footer">
-      <span>© 2025 VertragsCheck</span>
-      <span class="footer-dot"></span>
-      <span>Preview-Build</span>
-    </footer>
-
-    <!-- Detail-Overlay -->
-    <div id="detailOverlay" class="detail-overlay" aria-hidden="true">
-      <div class="detail-backdrop"></div>
-      <div class="detail-panel">
-        <button id="detailCloseBtn" class="detail-close-btn" type="button">Zur Übersicht</button>
-        <div class="detail-header">
-          <div>
-            <div id="detailTitle" class="detail-title">Vertrag</div>
-            <div id="detailMeta" class="detail-meta">–</div>
-          </div>
-          <div id="detailRiskBadge" class="detail-risk-badge">Risiko</div>
-        </div>
-        <p id="detailSummary" class="detail-summary">
-          Zusammenfassung zum Vertrag.
-        </p>
-        <ul id="detailPoints" class="detail-points"></ul>
-        <div class="detail-section">
-          <div class="detail-section-label">Vertragstext</div>
-          <div id="detailFullText" class="detail-fulltext"></div>
-        </div>
-      </div>
-    </div>
+    <footer class="footer muted">© 2025 VertragsCheck • Preview-Build</footer>
   </div>
-  <script src="script.js"></script>
+
+  <script src="script.js" defer></script>
 </body>
 </html>

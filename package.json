@@ -1,6 +1,9 @@
 {
-  "name": "vertragscheck-mvp",
-  "version": "1.0.0",
+  "name": "vertragscheck",
   "private": true,
-  "scripts": {}
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  }
 }
