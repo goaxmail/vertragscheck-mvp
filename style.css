@@ -495,6 +495,7 @@ textarea:focus {
   padding: 8px 10px;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.35);
+  color: var(--text-main);
 }
 
 .contract-card-main {
@@ -506,6 +507,8 @@ textarea:focus {
   margin: 0 0 6px;
   display: block;
   cursor: pointer;
+
+  color: var(--text-main);
 }
 
 .contract-card-header {
@@ -519,6 +522,8 @@ textarea:focus {
 .contract-card-title {
   font-size: 13px;
   font-weight: 600;
+
+  color: var(--text-main);
 }
 
 .contract-card-meta {
@@ -719,4 +724,11 @@ textarea:focus {
   border: 1px solid rgba(148, 163, 184, 0.3);
   overflow-y: auto;
   white-space: pre-wrap;
+}
+
+
+/* Button text inherits theme colors */
+button {
+  font: inherit;
+  color: inherit;
 }
