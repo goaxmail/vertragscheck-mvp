@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "vertragscheck-cache-v4";
+const CACHE_NAME = "vertragscheck-cache-v2";
 const ASSETS = [
   "/",
   "/index.html",

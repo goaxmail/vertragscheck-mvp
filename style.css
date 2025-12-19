@@ -33,37 +33,9 @@ body{
   overflow:hidden; /* main scroll lives in #appMain */
 }
 
-/* "App"-Frame im Browser (Desktop/Tablet): immer wie Smartphone aussehen – ohne JS */
-@media (min-width: 520px){
-  body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-
-  #appShell{
-    width: 390px;
-    height: 844px;
-    max-height: calc(100vh - 40px);
-    border-radius: 28px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 40px 120px rgba(0,0,0,.65);
-    border: 1px solid rgba(42,53,88,.8);
-  }
-
-  /* Header/Main/Nav in den Frame statt ins Viewport-Fixed */
-  #appHeader,
-  #appMain,
-  #bottomNav{
-    left: 0;
-    right: 0;
-    width: 100%;
-  }
-
-  #appHeader{ position:absolute; }
-  #appMain{ position:absolute; }
-  #bottomNav{ position:absolute; }
+#appShell{
+  height:100vh;
+  width:100%;
 }
 
 .glass{

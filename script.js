@@ -6,13 +6,6 @@
 */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Desktop-Frame aktivieren (damit die PWA auch im Browser wie eine App wirkt)
-  const applyDesktopFrame = () => {
-    document.body.classList.toggle("desktop", window.innerWidth >= 520);
-  };
-  applyDesktopFrame();
-  window.addEventListener("resize", applyDesktopFrame, { passive: true });
-
   // --- Config ---
   const DAILY_LIMIT = 3;
   const DEV_IGNORE_LIMIT = true; // Dev only (remove for release)
@@ -36,28 +29,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const contractText = document.getElementById("contractText");
   const analyzeBtn = document.getElementById("analyzeBtn");
-  const categoryChipsWrap = document.getElementById("categoryChips");
-  const categoryChips = categoryChipsWrap ? Array.from(categoryChipsWrap.querySelectorAll(".chip")) : [];
+
   const limitText = document.getElementById("limitText");
   const devModeText = document.getElementById("devModeText");
 
   const outputBody = document.getElementById("outputBody");
   const outputBadge = document.getElementById("outputBadge");
 
-  const getSelectedCategory = () => {
-    const active = categoryChips.find(b => b.classList.contains("active"));
-    return active?.dataset?.cat || "auto";
-  };
-
-  categoryChips.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      categoryChips.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-    });
-  });
-
   const contractsEmpty = document.getElementById("contractsEmpty");
   const contractsList = document.getElementById("contractsList");
+
   // Detail
   const detailTitle = document.getElementById("detailTitle");
   const detailRisk = document.getElementById("detailRisk");
@@ -70,25 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeBottomTab = "check";
   let currentView = "check";
   let lastContractsListScrollTop = 0;
-
-  // Category state
-  let selectedCategory = "auto";
-  function setCategory(cat) {
-    selectedCategory = cat || "auto";
-    categoryChips.forEach(btn => {
-      const isActive = (btn.dataset.cat || "auto") === selectedCategory;
-      btn.classList.toggle("active", isActive);
-    });
-  }
-
-  if (categoryChips.length) {
-    categoryChips.forEach(btn => {
-      btn.addEventListener("click", () => setCategory(btn.dataset.cat || "auto"));
-    });
-    // Ensure correct initial
-    const initial = categoryChips.find(b => b.classList.contains("active"))?.dataset?.cat || "auto";
-    setCategory(initial);
-  }
 
   // --- Helpers ---
   function todayKey() {
@@ -353,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, category: selectedCategory })
+        body: JSON.stringify({ text })
       });
 
       if (!res.ok) {
@@ -363,33 +325,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
-      // Expected shape (our api): { title, categoryLabel, riskLevel, summary, bullets, redFlags, nextSteps }
+      // Expected shape (our api): { title, riskLevel, summary, bullets }
       const title = data.title || clamp(text.split("\n")[0], 46) || "Vertrag";
       const riskLevel = data.riskLevel || "mittel";
-      const categoryLabel = data.categoryLabel || "Auto";
       const summary = data.summary || "";
       const bullets = Array.isArray(data.bullets) ? data.bullets : [];
-      const redFlags = Array.isArray(data.redFlags) ? data.redFlags : [];
-      const nextSteps = Array.isArray(data.nextSteps) ? data.nextSteps : [];
 
       // output render (simple)
-      outputBadge.textContent = (riskLevel === "hoch" ? "Rot" : riskLevel === "niedrig" ? "Grün" : "Gelb");
-      const parts = [];
-      parts.push(`Kategorie: ${categoryLabel}`);
-      if (summary) parts.push(`\n${summary}`);
-      if (bullets.length) {
-        parts.push(`\nWichtig:`);
-        parts.push(bullets.map(b => `• ${b}`).join("\n"));
-      }
-      if (redFlags.length) {
-        parts.push(`\nWarnungen:`);
-        parts.push(redFlags.map(b => `• ${b}`).join("\n"));
-      }
-      if (nextSteps.length) {
-        parts.push(`\nNächste Schritte:`);
-        parts.push(nextSteps.map(b => `• ${b}`).join("\n"));
-      }
-      outputBody.textContent = parts.join("\n");
+      outputBadge.textContent = "Tool";
+      outputBody.textContent =
+        `${summary}\n\n` +
+        (bullets.length ? bullets.map(b => `• ${b}`).join("\n") : "");
 
       incAnalyze();
       updateLimitUI();
@@ -402,13 +348,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const entry = {
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2),
         title,
-        categoryLabel,
         riskLevel,
         meta,
         summary: summary || "—",
         bullets,
-        redFlags,
-        nextSteps,
         snippet: clamp(summary || text, 160),
         raw: text
       };
