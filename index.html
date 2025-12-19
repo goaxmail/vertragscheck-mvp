@@ -1,2 +1,28 @@
-<!DOCTYPE html><html><head><meta charset='UTF-8'><title>VertragsCheck Pro</title><link rel='stylesheet' href='style.css'></head>
-<body><div class='app'><h1>VertragsCheck PRO – v1.1 UI</h1><p>Neues UI Grundgerüst installiert.</p></div><script src='script.js'></script></body></html>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>VertragsCheck PRO</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>VertragsCheck <span>PRO</span></h1>
+</header>
+
+<main class="container">
+  <section class="input-box">
+    <h2>Vertrag hochladen oder einfügen</h2>
+    <textarea id="contractText" placeholder="Füge deinen Vertragstext hier ein..."></textarea>
+    <button id="analyzeBtn">Analyse starten</button>
+  </section>
+
+  <section id="results" class="results hidden">
+    <h2>Analyse-Ergebnis</h2>
+    <div id="resultContent"></div>
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
