@@ -69,18 +69,15 @@ async function detectCategory(apiKey, text, model) {
     },
     {
       role: "user",
-      content:
-        "Klassifiziere den folgenden Vertragstext.
-
-" +
-        "Wähle die passendste Kategorie: mobilfunk, strom, versicherung, miete, sonstiges.
-" +
-        "Gib confidence als Zahl 0..1.
-
-" +
-        "Text:
-" +
+      content: [
+        "Klassifiziere den folgenden Vertragstext.",
+        "",
+        "Wähle die passendste Kategorie: mobilfunk, strom, versicherung, miete, sonstiges.",
+        "Gib confidence als Zahl 0..1.",
+        "",
+        "Text:",
         text,
+      ].join("\n"),
     },
   ];
 
@@ -184,16 +181,13 @@ export default async function handler(req, res) {
       { role: "system", content: prompt },
       {
         role: "user",
-        content:
-          "Analysiere den Vertragstext und gib NUR JSON nach Schema zurück.
-" +
-          "Kategorie: " +
-          catLabel +
-          "
-
-Text:
-" +
+        content: [
+          "Analysiere den Vertragstext und gib NUR JSON nach Schema zurück.",
+          "Kategorie: " + catLabel,
+          "",
+          "Text:",
           input,
+        ].join("\n"),
       },
     ];
 

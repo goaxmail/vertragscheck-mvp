@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categoryChipsWrap = document.getElementById("categoryChips");
   const categoryChips = categoryChipsWrap ? Array.from(categoryChipsWrap.querySelectorAll(".chip")) : [];
 
-  const categoryChips = Array.from(document.querySelectorAll("#categoryChips .chip"));
+
 
   const limitText = document.getElementById("limitText");
   const devModeText = document.getElementById("devModeText");
@@ -47,10 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const outputBody = document.getElementById("outputBody");
   const outputBadge = document.getElementById("outputBadge");
 
-  const getSelectedCategory = () => {
-    const active = categoryChips.find(b => b.classList.contains("active"));
-    return active?.dataset?.cat || "auto";
-  };
+  
 
   categoryChips.forEach((btn) => {
     btn.addEventListener("click", () => {
