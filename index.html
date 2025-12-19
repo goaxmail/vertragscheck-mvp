@@ -2,26 +2,42 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VertragsCheck PRO</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="topbar">
-  <h1>VertragsCheck <span>PRO</span></h1>
+
+<header class="app-header">
+  <h1>VertragsCheck PRO</h1>
 </header>
 
-<main class="container">
-  <section class="input-box">
-    <h2>Vertrag hochladen oder einfügen</h2>
-    <textarea id="contractText" placeholder="Füge deinen Vertragstext hier ein..."></textarea>
+<main id="page-check" class="page active">
+  <div class="card">
+    <h2>Schnellcheck</h2>
+    <textarea id="contractText" placeholder="Vertragstext hier einfügen..."></textarea>
     <button id="analyzeBtn">Analyse starten</button>
-  </section>
+  </div>
 
-  <section id="results" class="results hidden">
-    <h2>Analyse-Ergebnis</h2>
+  <div id="results" class="card hidden">
+    <h2>Analyse</h2>
     <div id="resultContent"></div>
-  </section>
+  </div>
 </main>
+
+<main id="page-contracts" class="page">
+  <div class="card"><h2>Gespeicherte Verträge</h2><p>Noch keine Verträge gespeichert.</p></div>
+</main>
+
+<main id="page-profile" class="page">
+  <div class="card"><h2>Profil</h2><p>Benutzerprofil kommt später.</p></div>
+</main>
+
+<nav class="tabbar">
+  <button data-page="page-check">🔍<span>Check</span></button>
+  <button data-page="page-contracts">📄<span>Verträge</span></button>
+  <button data-page="page-profile">👤<span>Profil</span></button>
+</nav>
 
 <script src="script.js"></script>
 </body>
