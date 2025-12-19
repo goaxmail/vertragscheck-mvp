@@ -68,17 +68,20 @@ async function detectCategory(apiKey, text, model) {
         "Du klassifizierst Vertragstexte in eine Kategorie. Antworte NUR nach dem JSON-Schema.",
     },
     {
-        role: "user",
-  content: [
-    "Klassifiziere den folgenden Vertragstext.",
-    "",
-    "Wähle die passendste Kategorie: mobilfunk, strom, versicherung, miete, sonstiges.",
-    "Gib confidence als Zahl 0..1.",
-    "",
-    "Text:",
-    text
-  ].join("\n"),
-},
+      role: "user",
+      content:
+        "Klassifiziere den folgenden Vertragstext.
+
+" +
+        "Wähle die passendste Kategorie: mobilfunk, strom, versicherung, miete, sonstiges.
+" +
+        "Gib confidence als Zahl 0..1.
+
+" +
+        "Text:
+" +
+        text,
+    },
   ];
 
   const j = await openaiJson({ apiKey, model, input: inputArr, schema });
@@ -180,15 +183,18 @@ export default async function handler(req, res) {
     const inputArr = [
       { role: "system", content: prompt },
       {
-          role: "user",
-  content: [
-    "Analysiere den Vertragstext und gib NUR JSON nach Schema zurück.",
-    "Kategorie: " + catLabel,
-    "",
-    "Text:",
-    input
-  ].join("\n"),
-},
+        role: "user",
+        content:
+          "Analysiere den Vertragstext und gib NUR JSON nach Schema zurück.
+" +
+          "Kategorie: " +
+          catLabel +
+          "
+
+Text:
+" +
+          input,
+      },
     ];
 
     const parsed = await openaiJson({ apiKey, model, input: inputArr, schema });

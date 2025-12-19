@@ -1,15 +1,21 @@
-/*
-  VertragsCheck – Build v1.3
-  Fixes:
-  - removed duplicate const/function declarations that broke parsing
-  - single source of truth for category + tab navigation
-  - buttons/tabs work again
+
+/* VertragsCheck – Detail-Ansicht v2 (Mobile-Fix)
+   - Header + BottomNav fixed
+   - Main content scrolls
+   - Detail is a real screen (not modal)
 */
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Desktop-Frame aktivieren (damit die PWA auch im Browser wie eine App wirkt)
+  const applyDesktopFrame = () => {
+    document.body.classList.toggle("desktop", window.innerWidth >= 520);
+  };
+  applyDesktopFrame();
+  window.addEventListener("resize", applyDesktopFrame, { passive: true });
+
   // --- Config ---
   const DAILY_LIMIT = 3;
-  const DEV_IGNORE_LIMIT = true; // set false for release
+  const DEV_IGNORE_LIMIT = true; // Dev only (remove for release)
 
   // Storage keys
   const KEY_LIMIT = "vc_limit_state_v1";
@@ -30,21 +36,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const contractText = document.getElementById("contractText");
   const analyzeBtn = document.getElementById("analyzeBtn");
-
   const categoryChipsWrap = document.getElementById("categoryChips");
-  const categoryChips = categoryChipsWrap
-    ? Array.from(categoryChipsWrap.querySelectorAll(".chip"))
-    : [];
-
+  const categoryChips = categoryChipsWrap ? Array.from(categoryChipsWrap.querySelectorAll(".chip")) : [];
   const limitText = document.getElementById("limitText");
   const devModeText = document.getElementById("devModeText");
 
   const outputBody = document.getElementById("outputBody");
   const outputBadge = document.getElementById("outputBadge");
 
+  const getSelectedCategory = () => {
+    const active = categoryChips.find(b => b.classList.contains("active"));
+    return active?.dataset?.cat || "auto";
+  };
+
+  categoryChips.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      categoryChips.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
   const contractsEmpty = document.getElementById("contractsEmpty");
   const contractsList = document.getElementById("contractsList");
-
   // Detail
   const detailTitle = document.getElementById("detailTitle");
   const detailRisk = document.getElementById("detailRisk");
@@ -60,6 +73,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Category state
   let selectedCategory = "auto";
+  function setCategory(cat) {
+    selectedCategory = cat || "auto";
+    categoryChips.forEach(btn => {
+      const isActive = (btn.dataset.cat || "auto") === selectedCategory;
+      btn.classList.toggle("active", isActive);
+    });
+  }
+
+  if (categoryChips.length) {
+    categoryChips.forEach(btn => {
+      btn.addEventListener("click", () => setCategory(btn.dataset.cat || "auto"));
+    });
+    // Ensure correct initial
+    const initial = categoryChips.find(b => b.classList.contains("active"))?.dataset?.cat || "auto";
+    setCategory(initial);
+  }
 
   // --- Helpers ---
   function todayKey() {
@@ -101,13 +130,46 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem(KEY_CONTRACTS, JSON.stringify(arr));
   }
 
+  function setActiveView(viewKey, opts = {}) {
+    // Persist list scroll when leaving contracts
+    if (currentView === "contracts") {
+      lastContractsListScrollTop = document.getElementById("appMain").scrollTop;
+    }
+
+    // Hide all
+    Object.values(views).forEach(v => v.classList.remove("active"));
+
+    // Show
+    const map = { "check":"check", "contracts":"contracts", "profile":"profile", "contract-detail":"detail" };
+    const resolved = map[viewKey] || "check";
+    views[resolved].classList.add("active");
+
+    currentView = resolved;
+
+    // Back button logic
+    if (resolved === "detail") backBtn.classList.add("show");
+    else backBtn.classList.remove("show");
+
+    // Scroll behavior
+    const main = document.getElementById("appMain");
+    if (resolved === "contracts") {
+      // restore list scroll
+      main.scrollTop = opts.restoreScroll ? lastContractsListScrollTop : 0;
+    } else {
+      main.scrollTop = 0;
+    }
+  }
+
+  function setBottomActive(tabKey) {
+    activeBottomTab = tabKey;
+    bottomNavBtns.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === tabKey);
+    });
+  }
+
   function escapeHTML(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
     }[c]));
   }
 
@@ -141,282 +203,276 @@ document.addEventListener("DOMContentLoaded", () => {
     return st.used < DAILY_LIMIT;
   }
 
-  function incrementUsage() {
+  function incAnalyze() {
+    if (DEV_IGNORE_LIMIT) return;
     const st = loadLimitState();
-    st.used = Number(st.used || 0) + 1;
+    st.used += 1;
     saveLimitState(st);
-    updateLimitUI();
   }
 
-  function setActiveView(viewKey, opts = {}) {
-    // Persist list scroll when leaving contracts
-    if (currentView === "contracts") {
-      lastContractsListScrollTop = document.getElementById("appMain").scrollTop;
-    }
-
-    Object.values(views).forEach((v) => v.classList.remove("active"));
-
-    const map = {
-      check: "check",
-      contracts: "contracts",
-      profile: "profile",
-      "contract-detail": "detail",
-      detail: "detail",
-    };
-    const resolved = map[viewKey] || "check";
-    views[resolved].classList.add("active");
-    currentView = resolved;
-
-    if (resolved === "detail") backBtn.classList.add("show");
-    else backBtn.classList.remove("show");
-
-    const main = document.getElementById("appMain");
-    if (resolved === "contracts") {
-      main.scrollTop = opts.restoreScroll ? lastContractsListScrollTop : 0;
-    } else {
-      main.scrollTop = 0;
-    }
+  function setOutputPlaceholder() {
+    outputBadge.textContent = "Tool";
+    outputBody.classList.add("muted");
+    outputBody.textContent = "Hier erscheint das Ergebnis deiner Analyse.";
   }
 
-  function setBottomActive(tabKey) {
-    activeBottomTab = tabKey;
-    bottomNavBtns.forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.tab === tabKey);
-    });
-  }
-
-  function setCategory(cat) {
-    selectedCategory = cat || "auto";
-    categoryChips.forEach((btn) => {
-      const isActive = (btn.dataset.cat || "auto") === selectedCategory;
-      btn.classList.toggle("active", isActive);
-    });
-  }
-
-  function getSelectedCategory() {
-    return selectedCategory || "auto";
-  }
-
-  function categoryLabel(cat) {
-    const map = {
-      auto: "Auto",
-      mobilfunk: "Mobilfunk/Internet",
-      strom: "Strom/Gas",
-      versicherung: "Versicherung",
-      miete: "Miete",
-      sonstiges: "Sonstiges",
-    };
-    return map[cat] || "Auto";
-  }
-
+  // --- Contracts rendering ---
   function renderContracts() {
-    const arr = loadContracts();
-    if (!arr.length) {
+    const items = loadContracts();
+    contractsList.innerHTML = "";
+
+    if (!items.length) {
       contractsEmpty.style.display = "block";
-      contractsList.innerHTML = "";
+      contractsList.style.display = "none";
       return;
     }
     contractsEmpty.style.display = "none";
+    contractsList.style.display = "flex";
 
-    contractsList.innerHTML = arr
-      .map((c, idx) => {
-        const rc = riskClass(c.riskLevel);
-        return `
-          <button class="contract-item glass" type="button" data-idx="${idx}">
-            <div class="ci-top">
-              <div class="ci-title">${escapeHTML(c.title || "Vertrag")}</div>
-              <span class="badge ${rc}">${escapeHTML(c.riskLevel || "Mittel")}</span>
-            </div>
-            <div class="ci-meta muted">${escapeHTML(c.categoryLabel || categoryLabel(c.category || "auto"))} • ${escapeHTML(c.date || "")}</div>
-            <div class="ci-snippet muted">${escapeHTML(clamp(c.summary || "", 120))}</div>
-          </button>
-        `;
-      })
-      .join("");
+    for (const item of items) {
+      const card = document.createElement("div");
+      card.className = "contract-card";
 
-    contractsList.querySelectorAll(".contract-item").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const idx = Number(btn.dataset.idx);
-        openDetail(idx);
+      const titleRow = document.createElement("div");
+      titleRow.className = "contract-title";
+
+      const title = document.createElement("div");
+      title.textContent = item.title || "Vertrag";
+
+      const badge = document.createElement("span");
+      badge.className = `badge risk ${riskClass(item.riskLevel)}`;
+      badge.textContent = `Risiko: ${item.riskLevel || "mittel"}`;
+
+      titleRow.appendChild(title);
+      titleRow.appendChild(badge);
+
+      const meta = document.createElement("div");
+      meta.className = "contract-meta";
+      meta.textContent = item.meta || "";
+
+      const snippet = document.createElement("div");
+      snippet.className = "contract-snippet";
+      snippet.textContent = item.snippet || "";
+
+      const actions = document.createElement("div");
+      actions.className = "contract-actions";
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "small-btn";
+      delBtn.type = "button";
+      delBtn.textContent = "Löschen";
+      delBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        deleteContract(item.id);
       });
-    });
+
+      actions.appendChild(delBtn);
+
+      card.appendChild(titleRow);
+      card.appendChild(meta);
+      card.appendChild(snippet);
+      card.appendChild(actions);
+
+      card.addEventListener("click", () => openDetail(item.id));
+      contractsList.appendChild(card);
+    }
   }
 
-  function openDetail(idx) {
-    const arr = loadContracts();
-    const c = arr[idx];
-    if (!c) return;
+  function deleteContract(id) {
+    const items = loadContracts().filter(x => x.id !== id);
+    saveContracts(items);
+    renderContracts();
+  }
 
-    detailTitle.textContent = c.title || "Vertrag";
-    detailRisk.textContent = c.riskLevel || "Mittel";
-    detailRisk.className = `badge ${riskClass(c.riskLevel)}`;
-    detailMeta.textContent = `${c.categoryLabel || categoryLabel(c.category || "auto")} • ${c.date || ""}`;
+  function openDetail(id) {
+    const items = loadContracts();
+    const item = items.find(x => x.id === id);
+    if (!item) return;
 
-    detailSummary.textContent = c.summary || "";
+    detailTitle.textContent = item.title || "Vertrag";
+    detailRisk.className = `badge risk ${riskClass(item.riskLevel)}`;
+    detailRisk.textContent = `Risiko: ${item.riskLevel || "mittel"}`;
+    detailMeta.textContent = item.meta || "";
 
+    detailSummary.textContent = item.summary || item.snippet || "—";
+
+    // bullets
     detailBullets.innerHTML = "";
-    (c.bullets || []).forEach((b) => {
+    const bullets = Array.isArray(item.bullets) ? item.bullets : [];
+    if (bullets.length) {
+      bullets.forEach(b => {
+        const li = document.createElement("li");
+        li.textContent = b;
+        detailBullets.appendChild(li);
+      });
+    } else {
       const li = document.createElement("li");
-      li.textContent = b;
+      li.textContent = "Keine weiteren Punkte erkannt.";
       detailBullets.appendChild(li);
-    });
+    }
 
-    detailRaw.textContent = c.rawText || "";
+    detailRaw.textContent = item.raw || "";
 
-    // keep bottom tab highlight on contracts when opening detail from list
+    // show detail screen, keep bottom tab on contracts
+    setBottomActive("contracts");
     setActiveView("contract-detail");
   }
 
-  function setOutputLoading(isLoading) {
-    if (isLoading) {
-      outputBody.innerHTML = `<div class="muted">Analyse läuft…</div>`;
-      outputBadge.textContent = "…";
-    } else {
-      outputBadge.textContent = "Tool";
-    }
-  }
-
-  function renderAnalysisToOutput(res) {
-    const rc = riskClass(res.riskLevel);
-    outputBadge.className = `badge ${rc}`;
-    outputBadge.textContent = res.riskLevel || "Mittel";
-
-    const bullets = (res.bullets || []).map((b) => `<li>${escapeHTML(b)}</li>`).join("");
-    const red = (res.redFlags || []).map((b) => `<li>${escapeHTML(b)}</li>`).join("");
-    const next = (res.nextSteps || []).map((b) => `<li>${escapeHTML(b)}</li>`).join("");
-
-    outputBody.innerHTML = `
-      <div class="out-row"><span class="muted">Kategorie:</span> <strong>${escapeHTML(res.categoryLabel || categoryLabel(res.category || getSelectedCategory()))}</strong></div>
-      <div class="out-block"><div class="out-title">Kurzfazit</div><div>${escapeHTML(res.summary || "")}</div></div>
-      ${bullets ? `<div class="out-block"><div class="out-title">Wichtige Punkte</div><ul>${bullets}</ul></div>` : ""}
-      ${red ? `<div class="out-block"><div class="out-title">Risiken / Red Flags</div><ul>${red}</ul></div>` : ""}
-      ${next ? `<div class="out-block"><div class="out-title">Nächste Schritte</div><ul>${next}</ul></div>` : ""}
-    `;
-  }
-
-  // --- Wiring ---
-
-  // Chips
-  if (categoryChips.length) {
-    categoryChips.forEach((btn) => {
-      btn.addEventListener("click", () => setCategory(btn.dataset.cat || "auto"));
-    });
-    const initial = categoryChips.find((b) => b.classList.contains("active"))?.dataset?.cat || "auto";
-    setCategory(initial);
-  } else {
-    setCategory("auto");
-  }
-
-  // Bottom nav
-  bottomNavBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const tabKey = btn.dataset.tab;
-      if (!tabKey) return;
-      setBottomActive(tabKey);
-      setActiveView(tabKey);
-      if (tabKey === "contracts") renderContracts();
-    });
-  });
-
-  // Back button from detail
-  backBtn?.addEventListener("click", () => {
+  function backToContracts() {
     setBottomActive("contracts");
     setActiveView("contracts", { restoreScroll: true });
-    renderContracts();
-  });
+  }
 
-  // Pro button (placeholder)
-  proBtn?.addEventListener("click", () => {
-    alert("Pro ist geplant. In v1.3 noch nicht aktiv.");
-  });
-
-  // Dev reset
-  devResetBtn?.addEventListener("click", () => {
-    if (!confirm("Alles lokal gespeicherte löschen? (Analysen + Limit)")) return;
-    localStorage.removeItem(KEY_CONTRACTS);
-    localStorage.removeItem(KEY_LIMIT);
-    updateLimitUI();
-    renderContracts();
-    outputBody.textContent = "Hier erscheint das Ergebnis deiner Analyse.";
-    outputBadge.className = "badge tool";
-    outputBadge.textContent = "Tool";
-  });
-
-  // Analyze
-  analyzeBtn?.addEventListener("click", async () => {
-    const text = String(contractText?.value || "").trim();
+  // --- Analysis ---
+  async function runAnalysis() {
+    const text = (contractText.value || "").trim();
     if (!text) {
-      alert("Bitte Vertragstext einfügen.");
+      outputBadge.textContent = "Hinweis";
+      outputBody.classList.remove("muted");
+      outputBody.textContent = "Bitte füge zuerst einen Vertragstext ein.";
       return;
     }
 
+    updateLimitUI();
     if (!canAnalyze()) {
-      alert("Tageslimit erreicht. Morgen wieder.");
+      outputBadge.textContent = "Limit";
+      outputBody.classList.remove("muted");
+      outputBody.textContent =
+        `Tageslimit erreicht: ${DAILY_LIMIT} von ${DAILY_LIMIT} Analysen genutzt.\n\n` +
+        `Du hast dein Tageskontingent bereits genutzt. Für eine häufigere Nutzung ist eine erweiterte Pro-Version geplant.`;
       return;
     }
 
-    setOutputLoading(true);
     analyzeBtn.disabled = true;
+    analyzeBtn.textContent = "Analyse läuft…";
+    outputBadge.textContent = "Tool";
+    outputBody.classList.remove("muted");
+    outputBody.textContent = "Analyse läuft…";
 
     try {
-      const payload = {
-        text,
-        category: getSelectedCategory(),
-      };
-
-      const r = await fetch("/api/analyze", {
+      const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ text, category: selectedCategory })
       });
 
-      const data = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        throw new Error(data?.error || `HTTP ${r.status}`);
+      if (!res.ok) {
+        const err = await res.text().catch(() => "");
+        throw new Error(err || `HTTP ${res.status}`);
       }
 
-      // Normalize for UI
-      const res = {
-        title: data.title || "Vertrag",
-        category: data.category || payload.category || "auto",
-        categoryLabel: data.categoryLabel || categoryLabel(data.category || payload.category || "auto"),
-        riskLevel: data.riskLevel || "Mittel",
-        summary: data.summary || "",
-        bullets: Array.isArray(data.bullets) ? data.bullets : [],
-        redFlags: Array.isArray(data.redFlags) ? data.redFlags : [],
-        nextSteps: Array.isArray(data.nextSteps) ? data.nextSteps : [],
+      const data = await res.json();
+
+      // Expected shape (our api): { title, categoryLabel, riskLevel, summary, bullets, redFlags, nextSteps }
+      const title = data.title || clamp(text.split("\n")[0], 46) || "Vertrag";
+      const riskLevel = data.riskLevel || "mittel";
+      const categoryLabel = data.categoryLabel || "Auto";
+      const summary = data.summary || "";
+      const bullets = Array.isArray(data.bullets) ? data.bullets : [];
+      const redFlags = Array.isArray(data.redFlags) ? data.redFlags : [];
+      const nextSteps = Array.isArray(data.nextSteps) ? data.nextSteps : [];
+
+      // output render (simple)
+      outputBadge.textContent = (riskLevel === "hoch" ? "Rot" : riskLevel === "niedrig" ? "Grün" : "Gelb");
+      const parts = [];
+      parts.push(`Kategorie: ${categoryLabel}`);
+      if (summary) parts.push(`\n${summary}`);
+      if (bullets.length) {
+        parts.push(`\nWichtig:`);
+        parts.push(bullets.map(b => `• ${b}`).join("\n"));
+      }
+      if (redFlags.length) {
+        parts.push(`\nWarnungen:`);
+        parts.push(redFlags.map(b => `• ${b}`).join("\n"));
+      }
+      if (nextSteps.length) {
+        parts.push(`\nNächste Schritte:`);
+        parts.push(nextSteps.map(b => `• ${b}`).join("\n"));
+      }
+      outputBody.textContent = parts.join("\n");
+
+      incAnalyze();
+      updateLimitUI();
+
+      // Save local contract entry
+      const d = new Date();
+      const meta = `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}, ` +
+                   `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")} Uhr`;
+
+      const entry = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2),
+        title,
+        categoryLabel,
+        riskLevel,
+        meta,
+        summary: summary || "—",
+        bullets,
+        redFlags,
+        nextSteps,
+        snippet: clamp(summary || text, 160),
+        raw: text
       };
 
-      renderAnalysisToOutput(res);
-
-      // Save to history
-      const now = new Date();
-      const dateStr = now.toLocaleDateString("de-DE");
-      const item = {
-        ...res,
-        date: dateStr,
-        rawText: text,
-      };
-
-      const arr = loadContracts();
-      arr.unshift(item);
-      saveContracts(arr);
-
-      incrementUsage();
+      const items = loadContracts();
+      items.unshift(entry);
+      saveContracts(items);
+      renderContracts();
 
     } catch (e) {
-      outputBody.innerHTML = `<div class="muted">Fehler: ${escapeHTML(e?.message || String(e))}</div>`;
-      outputBadge.className = "badge bad";
       outputBadge.textContent = "Fehler";
+      outputBody.textContent =
+        "Die Analyse konnte nicht durchgeführt werden.\n" +
+        "Bitte prüfe später erneut oder kontrolliere die Server-Konfiguration.";
+      console.error(e);
     } finally {
-      setOutputLoading(false);
       analyzeBtn.disabled = false;
+      analyzeBtn.textContent = "Analyse starten";
     }
+  }
+
+  // --- Dev Reset ---
+  function devResetAll() {
+    // Clear limit + contracts + output
+    localStorage.removeItem(KEY_LIMIT);
+    localStorage.removeItem(KEY_CONTRACTS);
+    updateLimitUI();
+    renderContracts();
+    setOutputPlaceholder();
+  }
+
+  // --- Events ---
+  bottomNavBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      setBottomActive(tab);
+      if (tab === "check") setActiveView("check");
+      if (tab === "contracts") setActiveView("contracts");
+      if (tab === "profile") setActiveView("profile");
+    });
   });
 
-  // Initial UI
+  backBtn.addEventListener("click", backToContracts);
+  analyzeBtn.addEventListener("click", runAnalysis);
+
+  proBtn.addEventListener("click", () => {
+    // Keep simple for now
+    setBottomActive("profile");
+    setActiveView("profile");
+  });
+
+  devResetBtn.addEventListener("click", () => {
+    devResetAll();
+  });
+
+  // --- SW register ---
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js").catch(() => {});
+  }
+
+  // Init
   updateLimitUI();
   renderContracts();
+  setOutputPlaceholder();
   setBottomActive("check");
   setActiveView("check");
 });

@@ -33,12 +33,7 @@ body{
   overflow:hidden; /* main scroll lives in #appMain */
 }
 
-/* "App"-Frame auf Desktop (damit es nicht wie eine Website wirkt) */
-#appShell{
-  height:100vh;
-  width:100%;
-}
-
+/* "App"-Frame im Browser (Desktop/Tablet): immer wie Smartphone aussehen – ohne JS */
 @media (min-width: 520px){
   body{
     display:flex;
@@ -47,8 +42,8 @@ body{
   }
 
   #appShell{
-    width: 430px;
-    height: 900px;
+    width: 390px;
+    height: 844px;
     max-height: calc(100vh - 40px);
     border-radius: 28px;
     overflow: hidden;
@@ -57,15 +52,18 @@ body{
     border: 1px solid rgba(42,53,88,.8);
   }
 
-  /* Auf Desktop müssen Header/Main/Nav in den Frame statt in das Viewport-Fixed */
+  /* Header/Main/Nav in den Frame statt ins Viewport-Fixed */
   #appHeader,
   #appMain,
   #bottomNav{
     left: 0;
     right: 0;
     width: 100%;
-    position:absolute;
   }
+
+  #appHeader{ position:absolute; }
+  #appMain{ position:absolute; }
+  #bottomNav{ position:absolute; }
 }
 
 .glass{
