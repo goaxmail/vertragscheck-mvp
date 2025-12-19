@@ -34,40 +34,39 @@ body{
 }
 
 /* "App"-Frame auf Desktop (damit es nicht wie eine Website wirkt) */
-body.desktop{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
 #appShell{
   height:100vh;
   width:100%;
 }
 
-body.desktop #appShell{
-  width: 430px;
-  height: 900px;
-  max-height: calc(100vh - 40px);
-  border-radius: 28px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 40px 120px rgba(0,0,0,.65);
-  border: 1px solid rgba(42,53,88,.8);
-}
+@media (min-width: 520px){
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
 
-/* Auf Desktop müssen Header/Main/Nav in den Frame statt in das Viewport-Fixed */
-body.desktop #appHeader,
-body.desktop #appMain,
-body.desktop #bottomNav{
-  left: 0;
-  right: 0;
-  width: 100%;
-}
+  #appShell{
+    width: 430px;
+    height: 900px;
+    max-height: calc(100vh - 40px);
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 120px rgba(0,0,0,.65);
+    border: 1px solid rgba(42,53,88,.8);
+  }
 
-body.desktop #appHeader{ position:absolute; }
-body.desktop #appMain{ position:absolute; }
-body.desktop #bottomNav{ position:absolute; }
+  /* Auf Desktop müssen Header/Main/Nav in den Frame statt in das Viewport-Fixed */
+  #appHeader,
+  #appMain,
+  #bottomNav{
+    left: 0;
+    right: 0;
+    width: 100%;
+    position:absolute;
+  }
+}
 
 .glass{
   background: rgba(15,23,48,.55);
