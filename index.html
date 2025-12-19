@@ -2,15 +2,13 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>VertragsCheck PRO</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header class="app-header">
-  <h1>VertragsCheck PRO</h1>
-</header>
+<div id="app-frame">
+<header class="app-header"><h1>VertragsCheck PRO</h1></header>
 
 <main id="page-check" class="page active">
   <div class="card">
@@ -18,7 +16,6 @@
     <textarea id="contractText" placeholder="Vertragstext hier einfügen..."></textarea>
     <button id="analyzeBtn">Analyse starten</button>
   </div>
-
   <div id="results" class="card hidden">
     <h2>Analyse</h2>
     <div id="resultContent"></div>
@@ -30,7 +27,7 @@
 </main>
 
 <main id="page-profile" class="page">
-  <div class="card"><h2>Profil</h2><p>Benutzerprofil kommt später.</p></div>
+  <div class="card"><h2>Profil</h2><p>Profilfunktionen folgen.</p></div>
 </main>
 
 <nav class="tabbar">
@@ -39,6 +36,7 @@
   <button data-page="page-profile">👤<span>Profil</span></button>
 </nav>
 
+</div>
 <script src="script.js"></script>
 </body>
 </html>

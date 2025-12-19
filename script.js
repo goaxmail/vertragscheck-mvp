@@ -4,6 +4,7 @@ document.querySelectorAll('.tabbar button').forEach(btn=>{
     const p = btn.dataset.page;
     document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
     document.getElementById(p).classList.add('active');
+    window.scrollTo(0,0);
   });
 });
 
