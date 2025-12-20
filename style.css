@@ -515,64 +515,55 @@ select.select-field:focus {
 }
 
 
-/* === Decision UI 1.1.0 (marker) === */
+/* === Decision UI 1.1.1 === */
+.decision-ui-marker { display:none; }
+
 .decision-hero {
-  padding: 18px;
-  border-radius: 16px;
-  margin-bottom: 14px;
-  text-align: center;
+  padding:18px;
+  border-radius:16px;
+  margin-bottom:14px;
+  text-align:center;
 }
 .decision-hero.low { background: rgba(0,200,120,0.18); }
 .decision-hero.medium { background: rgba(255,180,0,0.18); }
 .decision-hero.high { background: rgba(255,80,80,0.22); }
 
-.decision-badge {
-  font-size: 13px;
-  opacity: 0.85;
-  margin-bottom: 6px;
-}
-
-.decision-text {
-  font-size: 15px;
-  font-weight: 600;
-}
+.decision-badge { font-size:13px; opacity:.85; margin-bottom:6px; }
+.decision-text { font-size:15px; font-weight:600; }
 
 .decision-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:14px;
 }
-
 .risk-card {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.06);
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
 }
 
 .decision-impact {
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  margin-bottom: 14px;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
+  margin-bottom:14px;
 }
 
 .decision-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
-
 .decision-actions button {
-  padding: 14px;
-  border-radius: 14px;
-  font-size: 15px;
+  padding:14px;
+  border-radius:14px;
+  font-size:15px;
 }
-
 .decision-actions .primary-action {
-  background: linear-gradient(135deg,#5b6cff,#7c8cff);
-  color: #fff;
+  background:linear-gradient(135deg,#5b6cff,#7c8cff);
+  color:#fff;
 }
