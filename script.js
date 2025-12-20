@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (params.get("dev") === "0") localStorage.removeItem("vc_dev_mode");
   const DEV_MODE = true;
   const DEV_IGNORE_LIMIT = true;
-  const DEV_IGNORE_LIMIT = DEV_MODE;
   const STORAGE_KEY = "vc_analysis_usage";
 
   const tabButtons = document.querySelectorAll(".tab-btn");
@@ -238,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const visiblePoints = effectivePoints.slice(0, 3);
       const hiddenPointCount = Math.max(effectivePoints.length - visiblePoints.length, 0);
       const sectionCount = sections.length;
-      const hasProExtras = false;
+      const hasProExtras = hiddenPointCount > 0 || sectionCount > 0;
 
       const listItems = visiblePoints
         .map((note) => `<li>${note}</li>`)
@@ -263,26 +262,27 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <p class="risk-summary">${summary}</p>
         <ul class="risk-points">
-          ${listItems}
-          ${lockedLine}
-        </ul>
+        <!-- Conversion UI -->
         <div class="conversion-box">
           <h3>Top-Risiken</h3>
-          <ul class="conversion-risks">${listItems}</ul>
+          <p>Die wichtigsten kritischen Punkte aus deinem Vertrag.</p>
         </div>
         <div class="conversion-box">
           <h3>Was bedeutet das für dich?</h3>
-          <p>Diese Punkte können zu unerwarteten Kosten, langen Bindungen oder eingeschränkten Rechten führen.</p>
+          <p>Diese Klauseln können finanzielle oder rechtliche Nachteile verursachen.</p>
         </div>
         <div class="conversion-box">
           <h3>Nächste Schritte</h3>
           <ol>
-            <li>Kritische Stellen im Vertrag markieren</li>
-            <li>Kündigungs- und Laufzeit prüfen</li>
-            <li>Bei Unsicherheit rechtlichen Rat einholen</li>
+            <li>Relevante Stellen im Vertrag markieren</li>
+            <li>Kündigung, Laufzeit und Kosten prüfen</li>
+            <li>Bei Unsicherheit fachlichen Rat einholen</li>
           </ol>
         </div>
-
+        
+          ${listItems}
+          ${lockedLine}
+        </ul>
         <div class="pro-upsell">
           <div class="pro-upsell-tag">Pro (geplant)</div>
           <p class="pro-upsell-text">
