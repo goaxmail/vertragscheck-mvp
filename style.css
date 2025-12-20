@@ -505,62 +505,11 @@ select.select-field:focus {
   color: #e5e7eb;
 }
 
-
-/* === Decision UI 1.1.0 === */
-.decision-output { padding: 8px; }
-
-.decision-hero {
-  padding: 18px;
-  border-radius: 16px;
-  margin-bottom: 16px;
-  text-align: center;
-}
-.decision-hero.low { background: rgba(0,200,120,0.15); }
-.decision-hero.medium { background: rgba(255,180,0,0.15); }
-.decision-hero.high { background: rgba(255,80,80,0.18); }
-
-.decision-badge {
-  font-size: 13px;
-  margin-bottom: 6px;
-  opacity: 0.85;
-}
-
-.decision-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.risk-card {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.06);
-}
-
-.decision-impact {
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  margin-bottom: 16px;
-}
-
-.decision-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.decision-actions button {
-  padding: 14px;
-  border-radius: 14px;
-  font-size: 15px;
-}
-
-.decision-actions .primary {
-  background: linear-gradient(135deg,#5b6cff,#7c8cff);
-  color: #fff;
+.smart-analysis { margin-top:16px; }
+.sa-hero { font-size:15px; margin-bottom:12px; }
+.sa-box {
+  margin-bottom:12px;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.05);
 }
