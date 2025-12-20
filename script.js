@@ -262,27 +262,36 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <p class="risk-summary">${summary}</p>
         <ul class="risk-points">
-        <!-- Conversion UI -->
-        <div class="conversion-box">
-          <h3>Top-Risiken</h3>
-          <p>Die wichtigsten kritischen Punkte aus deinem Vertrag.</p>
-        </div>
-        <div class="conversion-box">
-          <h3>Was bedeutet das für dich?</h3>
-          <p>Diese Klauseln können finanzielle oder rechtliche Nachteile verursachen.</p>
-        </div>
-        <div class="conversion-box">
-          <h3>Nächste Schritte</h3>
-          <ol>
-            <li>Relevante Stellen im Vertrag markieren</li>
-            <li>Kündigung, Laufzeit und Kosten prüfen</li>
-            <li>Bei Unsicherheit fachlichen Rat einholen</li>
-          </ol>
-        </div>
-        
           ${listItems}
           ${lockedLine}
         </ul>
+
+        <div class="smart-analysis">
+          <div class="sa-hero">
+            <strong>Kurzfazit:</strong>
+            <p>${summary}</p>
+          </div>
+
+          <div class="sa-box">
+            <h3>⚠️ Die 3 wichtigsten Risiken</h3>
+            <ul>${listItems}</ul>
+          </div>
+
+          <div class="sa-box">
+            <h3>Was bedeutet das für dich?</h3>
+            <p>Du kannst länger zahlen als geplant, Fristen verpassen oder Zusatzkosten auslösen.</p>
+          </div>
+
+          <div class="sa-box">
+            <h3>Nächste Schritte</h3>
+            <ol>
+              <li>Kündigungsfrist notieren</li>
+              <li>Vertrag aktiv überwachen</li>
+              <li>Bei Unsicherheit prüfen lassen</li>
+            </ol>
+          </div>
+        </div>
+
         <div class="pro-upsell">
           <div class="pro-upsell-tag">Pro (geplant)</div>
           <p class="pro-upsell-text">
