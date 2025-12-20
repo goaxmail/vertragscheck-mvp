@@ -99,7 +99,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { text } = req.body || {};
+    const { text, category } = req.body || {};
     if (!text || typeof text !== "string") {
       return res.status(400).json({ error: "Missing contract text" });
     }
@@ -130,15 +130,33 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Missing OPENAI_API_KEY on server" });
     }
 
+    const categoryKey = typeof category === "string" ? category.trim() : "auto";
+    const allowedCategories = new Set([
+      "auto",
+      "mobilfunk",
+      "miete",
+      "versicherung",
+      "abo",
+      "sonstiges"
+    ]);
+    const safeCategory = allowedCategories.has(categoryKey) ? categoryKey : "auto";
+
+    const categoryHint =
+      safeCategory !== "auto"
+        ? `Der Nutzer hat die Kategorie vorgewählt: ${safeCategory}. Fokussiere deine Prüfung auf typische Risiken dieser Kategorie (z. B. Laufzeit/Kündigung, Kosten, automatische Verlängerung, Preisänderungen, Widerruf, Haftung).`
+        : "Erkenne zuerst grob, um welche Vertragsart es sich handelt (eine der Kategorien: mobilfunk, miete, versicherung, abo, sonstiges).";
+
     const prompt = [
       "Du unterstützt Verbraucher dabei, Vertragsklauseln besser zu verstehen.",
       "Analysiere den folgenden Vertragstext grob auf Risiko für den Kunden.",
       "WICHTIG: Keine Rechtsberatung. Keine erfundenen Paragraphen oder Behauptungen.",
       "Wenn Informationen fehlen: sag es klar und bleibe vorsichtig.",
+      categoryHint,
       "Gib eine strukturierte Einschätzung zurück – nur als JSON, kein Fließtext außen herum.",
       "",
       "Antwortformat (zwingend als JSON):",
       "{",
+      '  "category": "mobilfunk" | "miete" | "versicherung" | "abo" | "sonstiges",',
       '  "level": "low" | "medium" | "high",',
       '  "summary": "kurze Zusammenfassung in 1-3 Sätzen",',
       '  "points": ["Stichpunkt 1", "Stichpunkt 2", "..."],',
@@ -160,8 +178,7 @@ export default async function handler(req, res) {
       "",
       "Text:",
       trimmed
-    ].join("
-");
+    ].join("\n");
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -207,6 +224,7 @@ export default async function handler(req, res) {
     setQuotaCookie(res, nextQuota);
 
     return res.status(200).json({
+      category: parsed.category || (safeCategory !== "auto" ? safeCategory : ""),
       level: parsed.level || "unknown",
       summary: parsed.summary || "",
       points: Array.isArray(parsed.points) ? parsed.points : [],
@@ -214,7 +232,8 @@ export default async function handler(req, res) {
       meta: {
         daily_limit: DAILY_LIMIT,
         used_today: nextQuota.count,
-        max_chars: MAX_CHARS
+        max_chars: MAX_CHARS,
+        category_selected: safeCategory
       }
     });
   } catch (err) {

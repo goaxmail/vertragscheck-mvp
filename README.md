@@ -1,4 +1,4 @@
-# VertragsCheck – Analyse-Limit v1
+# VertragsCheck – v1.0.2
 
 Dieser Build enthält:
 
@@ -13,6 +13,7 @@ Dieser Build enthält:
   - **UI/Dev**: lokaler Counter (LocalStorage) für Anzeige/UX
 - Text-Limit: Standard max. 15.000 Zeichen
   - ENV: `MAX_CONTRACT_CHARS`
+- Kategorie-Auswahl (optional): Mobilfunk/Internet, Miete, Versicherung, Abos, Sonstiges oder Auto-Erkennung
 - PWA-Basis (Manifest + Service Worker)
 
 In Vercel muss die Umgebungsvariable `OPENAI_API_KEY` gesetzt sein.

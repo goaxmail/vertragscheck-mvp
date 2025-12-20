@@ -19,9 +19,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabViews = document.querySelectorAll(".tab-view");
   const analyzeBtn = document.getElementById("analyzeBtn");
   const contractInput = document.getElementById("contract");
+  const categorySelect = document.getElementById("contractCategory");
   const output = document.getElementById("output");
   const limitInfo = document.getElementById("limitInfo");
   const devResetBtn = document.getElementById("devResetBtn");
+
+  const CATEGORY_LABELS = {
+    auto: "Automatisch",
+    mobilfunk: "Mobilfunk & Internet",
+    miete: "Miete & Wohnen",
+    versicherung: "Versicherung",
+    abo: "Abos & Mitgliedschaften",
+    sonstiges: "Sonstiger Vertrag"
+  };
 
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -131,13 +141,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     output.innerHTML = '<p class="output-placeholder">Analyse läuft…</p>';
 
+    const selectedCategory = (categorySelect?.value || "auto").trim() || "auto";
+
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, category: selectedCategory })
       });
 
       if (!response.ok) {
@@ -179,6 +191,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const points = Array.isArray(data.points) ? data.points : [];
       const sections = Array.isArray(data.sections) ? data.sections : [];
 
+      const categoryMap = {
+        auto: "Automatisch",
+        mobilfunk: "Mobilfunk & Internet",
+        miete: "Miete & Wohnen",
+        versicherung: "Versicherung",
+        abo: "Abos & Mitgliedschaften",
+        sonstiges: "Sonstiger Vertrag"
+      };
+      const selectedKey = String(data?.meta?.category_selected || selectedCategory || "auto");
+      const detectedKey = String(data?.category || "");
+      const selectedLabel = categoryMap[selectedKey] || "Automatisch";
+      const detectedLabel = categoryMap[detectedKey] || (detectedKey ? detectedKey : "");
+      const showCategory = selectedKey !== "auto"
+        ? { label: selectedLabel, mode: "selected" }
+        : detectedKey
+          ? { label: detectedLabel, mode: "detected" }
+          : null;
+
       const baseFallbackPoints = [
         "Prüfe Laufzeit, automatische Verlängerung und Kündigungsfristen besonders sorgfältig.",
         "Achte auf zusätzliche Gebühren oder versteckte Kosten im Kleingedruckten.",
@@ -213,11 +243,16 @@ document.addEventListener("DOMContentLoaded", () => {
         ? `<li class="pro-locked">🔒 Zusätzliche Hinweise und eine Detail-Auswertung nach Themen sind für VertragsCheck&nbsp;Pro vorgesehen.</li>`
         : "";
 
+      const categoryLine = showCategory
+        ? `<div class="risk-meta">Kategorie: <strong>${showCategory.label}</strong>${showCategory.mode === "detected" ? " (erkannt)" : ""}</div>`
+        : "";
+
       output.innerHTML = `
         <div class="risk-header ${riskLevelClass}">
           <div>
             <div class="risk-label">Erste Einschätzung (Beta)</div>
             <div class="risk-badge">${badgeText}</div>
+            ${categoryLine}
           </div>
           <div class="risk-score">Tool</div>
         </div>

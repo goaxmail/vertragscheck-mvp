@@ -39,6 +39,15 @@
         </div>
 
         <div class="card">
+          <label for="contractCategory" class="field-label">Kategorie (optional)</label>
+          <select id="contractCategory" class="select-field">
+            <option value="auto" selected>Automatisch erkennen</option>
+            <option value="mobilfunk">Mobilfunk & Internet</option>
+            <option value="miete">Miete & Wohnen</option>
+            <option value="versicherung">Versicherung</option>
+            <option value="abo">Abos & Mitgliedschaften</option>
+            <option value="sonstiges">Sonstiger Vertrag</option>
+          </select>
           <label for="contract" class="field-label">Vertragstext</label>
           <textarea id="contract" placeholder="Vertragstext hier einfügen..."></textarea>
           <button id="analyzeBtn" class="primary-btn" type="button">Analyse starten</button>
