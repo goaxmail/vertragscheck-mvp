@@ -1,7 +1,18 @@
 
 document.addEventListener("DOMContentLoaded", () => {
-  const DAILY_LIMIT = 3;
-  const DEV_IGNORE_LIMIT = true; // Dev-Only: Limit deaktiviert. Vor Release auf false setzen oder entfernen.
+  const DAILY_LIMIT = 5;
+  const MAX_CHARS = 15000;
+  // Dev-Mode:
+  // - localhost is always dev
+  // - add ?dev=1 once to enable on a deployed URL (stored in localStorage)
+  // - add ?dev=0 to disable again
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("dev") === "1") localStorage.setItem("vc_dev_mode", "true");
+  if (params.get("dev") === "0") localStorage.removeItem("vc_dev_mode");
+  const DEV_MODE =
+    ["localhost", "127.0.0.1"].includes(window.location.hostname) ||
+    localStorage.getItem("vc_dev_mode") === "true";
+  const DEV_IGNORE_LIMIT = DEV_MODE;
   const STORAGE_KEY = "vc_analysis_usage";
 
   const tabButtons = document.querySelectorAll(".tab-btn");
@@ -10,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const contractInput = document.getElementById("contract");
   const output = document.getElementById("output");
   const limitInfo = document.getElementById("limitInfo");
+  const devResetBtn = document.getElementById("devResetBtn");
 
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -49,6 +61,11 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       limitInfo.textContent = `Heutige Analysen: ${usage.count} von ${DAILY_LIMIT}.`;
     }
+  }
+
+  function applyDevUi() {
+    if (!devResetBtn) return;
+    devResetBtn.style.display = DEV_MODE ? "inline-flex" : "none";
   }
 
   function setActiveTab(tabKey) {
@@ -94,6 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (text.length > MAX_CHARS) {
+      output.innerHTML = `
+        <p class="risk-summary">Der Vertragstext ist zu lang (max. ${MAX_CHARS.toLocaleString("de-DE")} Zeichen).</p>
+        <p class="disclaimer">Tipp: Füge nur die relevanten Abschnitte ein (Laufzeit, Kündigung, Kosten, Haftung).</p>
+      `;
+      return;
+    }
+
     const newUsage = { date: todayKey(), count: usage.count + 1 };
     saveUsage(newUsage);
     updateLimitInfo();
@@ -116,10 +141,38 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (!response.ok) {
-        throw new Error("API error");
+        const errPayload = await response.json().catch(() => ({}));
+        const status = response.status;
+
+        if (status === 429) {
+          output.innerHTML = `
+            <p class="risk-summary">Tageslimit erreicht.</p>
+            <p class="disclaimer">Bitte versuche es morgen erneut – oder nutze später die Pro-Version für mehr Analysen.</p>
+          `;
+          return;
+        }
+
+        if (status === 413) {
+          const max = errPayload?.max_chars || MAX_CHARS;
+          output.innerHTML = `
+            <p class="risk-summary">Der Vertragstext ist zu lang (max. ${Number(max).toLocaleString("de-DE")} Zeichen).</p>
+            <p class="disclaimer">Tipp: Füge nur die relevanten Abschnitte ein (Laufzeit, Kündigung, Kosten, Haftung).</p>
+          `;
+          return;
+        }
+
+        throw new Error(errPayload?.error || "API error");
       }
 
       const data = await response.json();
+
+      // Sync local counter with server meta (if available)
+      const usedToday = Number(data?.meta?.used_today);
+      const dailyLimit = Number(data?.meta?.daily_limit);
+      if (!Number.isNaN(usedToday) && !Number.isNaN(dailyLimit) && !DEV_IGNORE_LIMIT) {
+        saveUsage({ date: todayKey(), count: usedToday });
+      }
+      updateLimitInfo();
 
       const level = data.level || "unknown";
       const summary = data.summary || "Es gab ein Problem bei der Auswertung oder es liegen zu wenige Informationen vor.";
@@ -203,10 +256,22 @@ document.addEventListener("DOMContentLoaded", () => {
     analyzeBtn.addEventListener("click", analyzeContract);
   }
 
+  if (devResetBtn) {
+    devResetBtn.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      if (contractInput) contractInput.value = "";
+      if (output) {
+        output.innerHTML = '<p class="output-placeholder">Hier erscheint das Ergebnis deiner Analyse.</p>';
+      }
+      updateLimitInfo();
+    });
+  }
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/service-worker.js").catch(() => {});
   }
 
   setActiveTab("quick");
+  applyDevUi();
   updateLimitInfo();
 });

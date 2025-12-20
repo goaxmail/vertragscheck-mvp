@@ -6,7 +6,19 @@ Dieser Build enthält:
 - Vertragstext-Auswertung über eine serverseitige Schnittstelle zu OpenAI
 - Soft-Paywall: nur ein Teil der Hinweise ist sichtbar, zusätzliche Details sind für Pro vorgesehen
 - Strukturierte Pro-Analyse im Backend über `sections` (Themenblöcke)
-- Analyse-Limit: 3 Auswertungen pro Tag und Gerät (lokal per LocalStorage)
+- Analyse-Limit (MVP):
+  - **Serverseitig**: Standard 5 Auswertungen/Tag (signiertes Cookie, ohne Datenbank)
+    - ENV: `DAILY_LIMIT`
+    - Optional: `RATE_LIMIT_SECRET` (empfohlen)
+  - **UI/Dev**: lokaler Counter (LocalStorage) für Anzeige/UX
+- Text-Limit: Standard max. 15.000 Zeichen
+  - ENV: `MAX_CONTRACT_CHARS`
 - PWA-Basis (Manifest + Service Worker)
 
 In Vercel muss die Umgebungsvariable `OPENAI_API_KEY` gesetzt sein.
+
+## Dev-Modus
+
+- Lokal (localhost) ist Dev automatisch aktiv.
+- Auf einem Deploy kannst du Dev aktivieren mit `?dev=1` (wird lokal gespeichert).
+- Dev wieder aus mit `?dev=0`.
