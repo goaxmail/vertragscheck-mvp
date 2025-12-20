@@ -1,4 +1,4 @@
-# VertragsCheck – v1.0.2
+# VertragsCheck – v1.0.4
 
 Dieser Build enthält:
 
@@ -15,6 +15,10 @@ Dieser Build enthält:
   - ENV: `MAX_CONTRACT_CHARS`
 - Kategorie-Auswahl (optional): Mobilfunk/Internet, Miete, Versicherung, Abos, Sonstiges oder Auto-Erkennung
 - PWA-Basis (Manifest + Service Worker)
+
+Neu in v1.0.4:
+- Dev-Modus übermittelt jetzt ein Header-Signal an das Backend, damit **Limits im Dev-Modus wirklich komplett umgangen werden**.
+- Dev-Reset setzt weiterhin Client-State zurück und kann serverseitige Quota-Cookies zurücksetzen.
 
 In Vercel muss die Umgebungsvariable `OPENAI_API_KEY` gesetzt sein.
 

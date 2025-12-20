@@ -62,7 +62,6 @@ function readQuota(req) {
   } catch {
     return { date: todayKey(), count: 0 };
   }
-
   try {
     const decoded = JSON.parse(base64urlDecode(payloadB64));
     if (!decoded || decoded.date !== todayKey()) return { date: todayKey(), count: 0 };
@@ -93,6 +92,13 @@ export default async function handler(req, res) {
   // Avoid caching responses with personal content.
   res.setHeader("Cache-Control", "no-store");
 
+  // --- Dev mode controls ---
+  // In dev mode we deliberately bypass rate limits so you can test freely.
+  // Dev mode is enabled either via explicit header from the frontend or on localhost.
+  const host = String(req.headers?.host || "");
+  const DEV_MODE = String(req.headers["x-dev-mode"] || "") === "1" || host.includes("localhost");
+  const DEV_RESET = String(req.headers["x-dev-reset"] || "") === "1";
+
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
     return res.status(405).json({ error: "Method not allowed" });
@@ -116,13 +122,17 @@ export default async function handler(req, res) {
       });
     }
 
+    // Dev-only helper: reset the server-side daily quota cookie.
+    // This is honored ONLY when DEV_MODE is active.
+    if (DEV_MODE && DEV_RESET) {
+      setQuotaCookie(res, { date: todayKey(), count: 0 });
+      return res.status(200).json({ ok: true, reset: true });
+    }
+
     // --- Server-side daily quota ---
-    const quota = readQuota(req);
-    if (quota.count >= DAILY_LIMIT) {
-      return res.status(429).json({
-        error: "Daily limit reached",
-        limit: DAILY_LIMIT
-      });
+    const quota = DEV_MODE ? { date: todayKey(), count: 0 } : readQuota(req);
+    if (!DEV_MODE && quota.count >= DAILY_LIMIT) {
+      return res.status(429).json({ error: "Daily limit reached", limit: DAILY_LIMIT });
     }
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -147,34 +157,53 @@ export default async function handler(req, res) {
         : "Erkenne zuerst grob, um welche Vertragsart es sich handelt (eine der Kategorien: mobilfunk, miete, versicherung, abo, sonstiges).";
 
     const prompt = [
-      "Du unterstützt Verbraucher dabei, Vertragsklauseln besser zu verstehen.",
-      "Analysiere den folgenden Vertragstext grob auf Risiko für den Kunden.",
-      "WICHTIG: Keine Rechtsberatung. Keine erfundenen Paragraphen oder Behauptungen.",
-      "Wenn Informationen fehlen: sag es klar und bleibe vorsichtig.",
+      "Du bist ein Vertrags-Check-Assistent für Verbraucher.",
+      "Aufgabe: Erkenne die wichtigsten Risiken/Fallen im Vertrag und gib konkrete, nachvollziehbare To-dos.",
+      "WICHTIG: Keine Rechtsberatung. Keine erfundenen Paragraphen oder Behauptungen. Wenn etwas nicht im Text steht: sag es.",
+      "Schreibe klar, kurz, konkret. Keine Panikmache. Keine absoluten Aussagen.",
       categoryHint,
-      "Gib eine strukturierte Einschätzung zurück – nur als JSON, kein Fließtext außen herum.",
+      "",
+      "Gib ausschließlich JSON zurück (kein Text außerhalb).",
+      "JSON-Regeln:",
+      "- Verwende nur Informationen aus dem Text.",
+      "- Wenn möglich: nenne kurze Textstellen als Beleg (max. 1–2 Sätze) und markiere sie als 'Zitat: ...'.",
       "",
       "Antwortformat (zwingend als JSON):",
       "{",
       '  "category": "mobilfunk" | "miete" | "versicherung" | "abo" | "sonstiges",',
       '  "level": "low" | "medium" | "high",',
-      '  "summary": "kurze Zusammenfassung in 1-3 Sätzen",',
-      '  "points": ["Stichpunkt 1", "Stichpunkt 2", "..."],',
+      '  "summary": "1–3 Sätze: worum geht es und wo liegt das Haupt-Risiko?",',
+      '  "points": [',
+      '    "Top-Risiko 1 – konkrete Konsequenz (was passiert, wenn man nichts tut)",',
+      '    "Top-Risiko 2 – konkrete Konsequenz",',
+      '    "Top-Risiko 3 – konkrete Konsequenz",',
+      '    "To-do: Konkrete Handlung (z.B. kündigen bis X / nachfragen / Vergleich prüfen)",',
+      '    "To-do: ...",',
+      '    "... (insgesamt 8–12 Punkte)"',
+      "  ],",
       '  "sections": [',
-      '    {',
+      "    {",
       '      "title": "Laufzeit & Kündigung",',
       '      "risk": "low" | "medium" | "high",',
-      '      "notes": ["Hinweis 1", "Hinweis 2"]',
+      '      "notes": ["kurze Fakten + Zitat-Beleg falls möglich", "To-do in 1 Satz"]',
       "    },",
       "    {",
       '      "title": "Kosten & Gebühren",',
       '      "risk": "low" | "medium" | "high",',
-      '      "notes": ["Hinweis 1", "Hinweis 2"]',
+      '      "notes": ["kurze Fakten + Zitat-Beleg falls möglich", "Hinweise zu Preisänderungen/Extras"]',
+      "    },",
+      "    {",
+      '      "title": "Einschränkungen & Ausschlüsse",',
+      '      "risk": "low" | "medium" | "high",',
+      '      "notes": ["z.B. Leistungs-Ausschlüsse, Wartezeiten, Selbstbehalt, Bedingungen", "Zitat: ..."]',
+      "    },",
+      "    {",
+      '      "title": "Deine nächsten Schritte",',
+      '      "risk": "low" | "medium" | "high",',
+      '      "notes": ["3 konkrete To-dos in Stichpunkten", "Fragen an den Anbieter (copy-paste-ready)"]',
       "    }",
       "  ]",
       "}",
-      "",
-      "Wenn bestimmte Themen nicht im Text vorkommen, kannst du die entsprechenden sections weglassen.",
       "",
       "Text:",
       trimmed
@@ -219,9 +248,9 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Failed to parse AI response" });
     }
 
-    // Increment quota ONLY on successful AI response
-    const nextQuota = { date: todayKey(), count: quota.count + 1 };
-    setQuotaCookie(res, nextQuota);
+    // Increment quota ONLY on successful AI response (not in dev mode)
+    const nextQuota = DEV_MODE ? quota : { date: todayKey(), count: quota.count + 1 };
+    if (!DEV_MODE) setQuotaCookie(res, nextQuota);
 
     return res.status(200).json({
       category: parsed.category || (safeCategory !== "auto" ? safeCategory : ""),

@@ -147,7 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          // Ensure backend knows when we are in dev-mode (so it can bypass limits).
+          "X-DEV-MODE": DEV_MODE ? "1" : "0"
         },
         body: JSON.stringify({ text, category: selectedCategory })
       });
@@ -159,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (status === 429) {
           output.innerHTML = `
             <p class="risk-summary">Tageslimit erreicht.</p>
-            <p class="disclaimer">Bitte versuche es morgen erneut – oder nutze später die Pro-Version für mehr Analysen.</p>
+            <p class="disclaimer">Bitte versuche es morgen erneut. Eine Pro-Version mit mehr Analysen ist geplant.</p>
           `;
           return;
         }
@@ -240,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .join("");
 
       const lockedLine = hasProExtras
-        ? `<li class="pro-locked">🔒 Zusätzliche Hinweise und eine Detail-Auswertung nach Themen sind für VertragsCheck&nbsp;Pro vorgesehen.</li>`
+        ? `<li class="pro-locked">🔒 Zusätzliche Hinweise und eine Detail-Auswertung nach Themen sind für VertragsCheck&nbsp;Pro <strong>(geplant)</strong>.</li>`
         : "";
 
       const categoryLine = showCategory
@@ -292,7 +294,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (devResetBtn) {
-    devResetBtn.addEventListener("click", () => {
+    devResetBtn.addEventListener("click", async () => {
+      // Reset client-side counter + request the server to reset its signed quota cookie.
+      try {
+        await fetch("/api/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-DEV-MODE": DEV_MODE ? "1" : "0",
+            "X-DEV-RESET": "1"
+          },
+          body: JSON.stringify({ text: "dev-reset", category: "auto" })
+        });
+      } catch (_) {
+        // Even if the request fails, still reset the local UI for convenience.
+      }
+
       localStorage.removeItem(STORAGE_KEY);
       if (contractInput) contractInput.value = "";
       if (output) {
@@ -300,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       updateLimitInfo();
     });
-  }
+}
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/service-worker.js").catch(() => {});
