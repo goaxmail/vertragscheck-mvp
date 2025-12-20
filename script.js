@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!limitInfo) return;
     const usage = loadUsage();
     if (DEV_IGNORE_LIMIT) {
-      limitInfo.textContent = `Dev-Modus: ${usage.count} Analysen heute (Limit deaktiviert).`;
+      limitInfo.textContent = `Dev-Modus aktiv (Limit deaktiviert).`;
     } else if (usage.count >= DAILY_LIMIT) {
       limitInfo.textContent = `Tageslimit erreicht: ${usage.count} von ${DAILY_LIMIT} Analysen genutzt.`;
     } else {
@@ -148,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Ensure backend knows when we are in dev-mode (so it can bypass limits).
           "X-DEV-MODE": DEV_MODE ? "1" : "0"
         },
         body: JSON.stringify({ text, category: selectedCategory })
@@ -203,13 +202,18 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       const selectedKey = String(data?.meta?.category_selected || selectedCategory || "auto");
       const detectedKey = String(data?.category || "");
+      const usedKey = String(data?.meta?.category_used || detectedKey || "");
+      const corrected = Boolean(data?.meta?.category_corrected);
       const selectedLabel = categoryMap[selectedKey] || "Automatisch";
       const detectedLabel = categoryMap[detectedKey] || (detectedKey ? detectedKey : "");
-      const showCategory = selectedKey !== "auto"
-        ? { label: selectedLabel, mode: "selected" }
-        : detectedKey
-          ? { label: detectedLabel, mode: "detected" }
-          : null;
+      const usedLabel = categoryMap[usedKey] || (usedKey ? usedKey : "");
+      const showCategory = corrected
+        ? { label: usedLabel, mode: "corrected", original: selectedLabel }
+        : selectedKey !== "auto"
+          ? { label: selectedLabel, mode: "selected" }
+          : detectedKey
+            ? { label: detectedLabel, mode: "detected" }
+            : null;
 
       const baseFallbackPoints = [
         "Prüfe Laufzeit, automatische Verlängerung und Kündigungsfristen besonders sorgfältig.",
@@ -246,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
         : "";
 
       const categoryLine = showCategory
-        ? `<div class="risk-meta">Kategorie: <strong>${showCategory.label}</strong>${showCategory.mode === "detected" ? " (erkannt)" : ""}</div>`
+        ? `<div class="risk-meta">Kategorie: <strong>${showCategory.label}</strong>${showCategory.mode === "detected" ? " (erkannt)" : showCategory.mode === "corrected" ? " (korrigiert)" : ""}</div>`
         : "";
 
       output.innerHTML = `

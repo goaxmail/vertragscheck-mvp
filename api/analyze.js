@@ -4,6 +4,45 @@ import crypto from "crypto";
 const DAILY_LIMIT = Number(process.env.DAILY_LIMIT || 5);
 const MAX_CHARS = Number(process.env.MAX_CONTRACT_CHARS || 15000);
 
+
+
+function detectCategoryFromText(text) {
+  const t = String(text || "").toLowerCase();
+
+  const scores = {
+    mobilfunk: 0,
+    miete: 0,
+    versicherung: 0,
+    abo: 0
+  };
+
+  const add = (key, n=1) => { scores[key] = (scores[key] || 0) + n; };
+
+  // Mobilfunk / Internet
+  if (/(mobilfunk|sim\-?karte|tarif|datenvolumen|roaming|netzbetreiber)/.test(t)) add("mobilfunk", 2);
+  if (/(internet|dsl|glasfaser|router|wlan|bandbreite|mbit|kabelanschluss)/.test(t)) add("mobilfunk", 1);
+
+  // Miete / Wohnen
+  if (/(mietvertrag|kaltmiete|nebenkosten|kaution|vermieter|mieter|wohnung|mietsache)/.test(t)) add("miete", 2);
+  if (/(schönheitsreparaturen|hausordnung|staffelmiete|tierhaltung|betriebskosten)/.test(t)) add("miete", 1);
+
+  // Versicherung
+  if (/(versicherung|versicherungsvertrag|prämie|beitrag|selbstbeteiligung|schaden|wartezeit)/.test(t)) add("versicherung", 2);
+  if (/(leistungsausschluss|grobe fahrlässigkeit|versicherungsjahr)/.test(t)) add("versicherung", 1);
+
+  // Abo / Mitgliedschaft
+  if (/(abo|mitgliedschaft|fitnessstudio|streaming|probeabo|verlängerung um \d+ monate)/.test(t)) add("abo", 2);
+  if (/(monatlich kündbar|kündigungsfrist \d+ wochen|verwaltungsgebühr|pausieren)/.test(t)) add("abo", 1);
+
+  // Choose best if above threshold
+  let best = "sonstiges";
+  let bestScore = 0;
+  for (const [k, v] of Object.entries(scores)) {
+    if (v > bestScore) { bestScore = v; best = k; }
+  }
+  return bestScore >= 2 ? best : "sonstiges";
+}
+
 // Signed cookie to keep a *server-side* daily quota without a database.
 // (Users could clear cookies, but it prevents trivial client-side bypassing
 // and protects you from accidental cost spikes.)
@@ -62,6 +101,7 @@ function readQuota(req) {
   } catch {
     return { date: todayKey(), count: 0 };
   }
+
   try {
     const decoded = JSON.parse(base64urlDecode(payloadB64));
     if (!decoded || decoded.date !== todayKey()) return { date: todayKey(), count: 0 };
@@ -92,17 +132,19 @@ export default async function handler(req, res) {
   // Avoid caching responses with personal content.
   res.setHeader("Cache-Control", "no-store");
 
-  // --- Dev mode controls ---
-  // In dev mode we deliberately bypass rate limits so you can test freely.
-  // Dev mode is enabled either via explicit header from the frontend or on localhost.
-  const host = String(req.headers?.host || "");
-  const DEV_MODE = String(req.headers["x-dev-mode"] || "") === "1" || host.includes("localhost");
-  const DEV_RESET = String(req.headers["x-dev-reset"] || "") === "1";
-
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
     return res.status(405).json({ error: "Method not allowed" });
+  }  const DEV_MODE = String(req.headers["x-dev-mode"] || "") === "1";
+  const DEV_RESET = String(req.headers["x-dev-reset"] || "") === "1";
+
+  // Dev-only helper: reset the server-side daily quota (useful while testing).
+  if (DEV_MODE && DEV_RESET) {
+    setQuotaCookie(res, { date: todayKey(), count: 0 });
+    return res.status(200).json({ ok: true, reset: true });
   }
+
+
 
   try {
     const { text, category } = req.body || {};
@@ -122,20 +164,16 @@ export default async function handler(req, res) {
       });
     }
 
-    // Dev-only helper: reset the server-side daily quota cookie.
-    // This is honored ONLY when DEV_MODE is active.
-    if (DEV_MODE && DEV_RESET) {
-      setQuotaCookie(res, { date: todayKey(), count: 0 });
-      return res.status(200).json({ ok: true, reset: true });
-    }
-
     // --- Server-side daily quota ---
     const quota = DEV_MODE ? { date: todayKey(), count: 0 } : readQuota(req);
     if (!DEV_MODE && quota.count >= DAILY_LIMIT) {
-      return res.status(429).json({ error: "Daily limit reached", limit: DAILY_LIMIT });
+      return res.status(429).json({
+        error: "Daily limit reached",
+        limit: DAILY_LIMIT
+      });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "Missing OPENAI_API_KEY on server" });
     }
@@ -150,10 +188,24 @@ export default async function handler(req, res) {
       "sonstiges"
     ]);
     const safeCategory = allowedCategories.has(categoryKey) ? categoryKey : "auto";
+    const detectedFromText = detectCategoryFromText(trimmed);
+    let categoryUsed = safeCategory;
+    let categoryCorrected = false;
+
+    if (safeCategory !== "auto" &&
+        detectedFromText &&
+        detectedFromText !== "sonstiges" &&
+        detectedFromText !== safeCategory) {
+      categoryUsed = detectedFromText;
+      categoryCorrected = true;
+    }
+
 
     const categoryHint =
-      safeCategory !== "auto"
-        ? `Der Nutzer hat die Kategorie vorgewählt: ${safeCategory}. Fokussiere deine Prüfung auf typische Risiken dieser Kategorie (z. B. Laufzeit/Kündigung, Kosten, automatische Verlängerung, Preisänderungen, Widerruf, Haftung).`
+      categoryUsed !== "auto"
+        ? (categoryCorrected
+            ? `Der Nutzer hat eine Kategorie gewählt (${safeCategory}), aber der Text passt eher zu: ${categoryUsed}. Analysiere als ${categoryUsed} und fokussiere auf typische Fallstricke dieser Kategorie.`
+            : `Der Nutzer hat die Kategorie vorgewählt: ${categoryUsed}. Fokussiere deine Analyse auf diese Kategorie und typische Fallstricke.`)
         : "Erkenne zuerst grob, um welche Vertragsart es sich handelt (eine der Kategorien: mobilfunk, miete, versicherung, abo, sonstiges).";
 
     const prompt = [
@@ -248,21 +300,22 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Failed to parse AI response" });
     }
 
-    // Increment quota ONLY on successful AI response (not in dev mode)
-    const nextQuota = DEV_MODE ? quota : { date: todayKey(), count: quota.count + 1 };
+    // Increment quota ONLY on successful AI response (skip in dev-mode)
+    const nextQuota = DEV_MODE ? { date: todayKey(), count: 0 } : { date: todayKey(), count: quota.count + 1 };
     if (!DEV_MODE) setQuotaCookie(res, nextQuota);
-
     return res.status(200).json({
-      category: parsed.category || (safeCategory !== "auto" ? safeCategory : ""),
+      category: parsed.category || (categoryUsed !== "auto" ? categoryUsed : ""),
       level: parsed.level || "unknown",
       summary: parsed.summary || "",
       points: Array.isArray(parsed.points) ? parsed.points : [],
       sections: Array.isArray(parsed.sections) ? parsed.sections : [],
       meta: {
         daily_limit: DAILY_LIMIT,
-        used_today: nextQuota.count,
+        used_today: DEV_MODE ? 0 : nextQuota.count,
         max_chars: MAX_CHARS,
-        category_selected: safeCategory
+        category_selected: safeCategory,
+        category_used: categoryUsed,
+        category_corrected: categoryCorrected
       }
     });
   } catch (err) {
