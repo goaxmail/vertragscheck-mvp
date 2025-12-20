@@ -101,27 +101,27 @@ document.addEventListener("DOMContentLoaded", () => {
         output.innerHTML = `
   <div class="decision-hero ${riskLevelClass}">
     <div class="decision-badge">${badgeText}</div>
-    <h2>${summary}</h2>
+    <div class="decision-text">${summary}</div>
   </div>
 
   <div class="decision-cards">
-    ${effectivePoints.slice(0,3).map(p=>`
+    ${effectivePoints.slice(0,3).map(p => `
       <div class="risk-card">
-        <span class="icon">❗</span>
-        <span>${p}</span>
+        <span class="risk-icon">❗</span>
+        <span class="risk-text">${p}</span>
       </div>
     `).join("")}
   </div>
 
   <div class="decision-impact">
-    <h3>Was heißt das für dich?</h3>
-    <p>Dieser Vertrag erfordert Aufmerksamkeit. Fristen oder Kosten können dich länger binden als geplant.</p>
+    <h3>Was bedeutet das für dich?</h3>
+    <p>Dieser Vertrag kann dich länger binden oder zusätzliche Kosten verursachen, wenn du Fristen übersiehst.</p>
   </div>
 
   <div class="decision-actions">
-    <button class="primary">📅 Kündigungsfrist merken</button>
-    <button>👀 Vertrag im Blick behalten</button>
-    <button>⚖️ Prüfen lassen</button>
+    <button type="button" class="primary-action">📅 Kündigungsfrist merken</button>
+    <button type="button">👀 Vertrag im Blick behalten</button>
+    <button type="button">⚖️ Prüfen lassen</button>
   </div>
 `;
       }
@@ -283,6 +283,33 @@ document.addEventListener("DOMContentLoaded", () => {
           ${listItems}
           ${lockedLine}
         </ul>
+
+        <div class="smart-analysis">
+          <div class="sa-hero">
+            <strong>Kurzfazit:</strong>
+            <p>${summary}</p>
+          </div>
+
+          <div class="sa-box">
+            <h3>⚠️ Die 3 wichtigsten Risiken</h3>
+            <ul>${listItems}</ul>
+          </div>
+
+          <div class="sa-box">
+            <h3>Was bedeutet das für dich?</h3>
+            <p>Du kannst länger zahlen als geplant, Fristen verpassen oder Zusatzkosten auslösen.</p>
+          </div>
+
+          <div class="sa-box">
+            <h3>Nächste Schritte</h3>
+            <ol>
+              <li>Kündigungsfrist notieren</li>
+              <li>Vertrag aktiv überwachen</li>
+              <li>Bei Unsicherheit prüfen lassen</li>
+            </ol>
+          </div>
+        </div>
+
         <div class="pro-upsell">
           <div class="pro-upsell-tag">Pro (geplant)</div>
           <p class="pro-upsell-text">
