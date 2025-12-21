@@ -132,7 +132,15 @@ function saveUsage(usage) {
     const usage = loadUsage();
     if (!DEV_IGNORE_LIMIT && usage.count >= DAILY_LIMIT) {
       if (output) {
-        output.innerHTML = `
+        if (UI_MODE === "decision") {
+      output.innerHTML = renderDecisionUI({
+        riskLevelClass,
+        badgeText,
+        summary,
+        effectivePoints
+      });
+    } else {
+      output.innerHTML = `
           <p class="risk-summary">
             Du hast dein Tageskontingent von ${DAILY_LIMIT} Analysen bereits genutzt.
           </p>
@@ -140,6 +148,7 @@ function saveUsage(usage) {
             Für eine häufigere Nutzung ist eine erweiterte Pro-Version von VertragsCheck geplant.
           </p>
         `;
+    }
       }
       updateLimitInfo();
       return;
