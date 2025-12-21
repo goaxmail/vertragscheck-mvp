@@ -515,7 +515,7 @@ select.select-field:focus {
 }
 
 
-/* === Decision UI 1.1.1 === */
+/* === Decision UI (Parallel Renderer) === */
 .decision-ui-marker { display:none; }
 
 .decision-hero {

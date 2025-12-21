@@ -1,5 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+  const UI_MODE = "decision"; // 'decision' | 'classic'
+
   const DAILY_LIMIT = 5;
   const MAX_CHARS = 15000;
   // Dev-Mode:
@@ -51,7 +53,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function saveUsage(usage) {
+  
+  function renderDecisionUI({ riskLevelClass, badgeText, summary, effectivePoints }) {
+    return `
+      <div class="decision-ui-marker">DECISION_UI_PARALLEL</div>
+
+      <div class="decision-hero ${riskLevelClass}">
+        <div class="decision-badge">${badgeText}</div>
+        <div class="decision-text">${summary}</div>
+      </div>
+
+      <div class="decision-cards">
+        ${effectivePoints.slice(0,3).map(p => `
+          <div class="risk-card">
+            <span class="risk-icon">❗</span>
+            <span class="risk-text">${p}</span>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="decision-impact">
+        <h3>Was bedeutet das für dich?</h3>
+        <p>Dieser Vertrag kann dich länger binden oder zusätzliche Kosten verursachen, wenn du Fristen übersiehst.</p>
+      </div>
+
+      <div class="decision-actions">
+        <button type="button" class="primary-action">📅 Kündigungsfrist merken</button>
+        <button type="button">👀 Vertrag im Blick behalten</button>
+        <button type="button">⚖️ Prüfen lassen</button>
+      </div>
+    `;
+  }
+
+function saveUsage(usage) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(usage));
     } catch (e) {
@@ -252,35 +286,64 @@ document.addEventListener("DOMContentLoaded", () => {
         : "";
 
       output.innerHTML = `
-  <div class="decision-ui-marker">DECISION_UI_1_1_1</div>
+        <div class="risk-header ${riskLevelClass}">
+          <div>
+            <div class="risk-label">Erste Einschätzung (Beta)</div>
+            <div class="risk-badge">${badgeText}</div>
+            ${categoryLine}
+          </div>
+          <div class="risk-score">Tool</div>
+        </div>
+        <p class="risk-summary">${summary}</p>
+        <ul class="risk-points">
+          ${listItems}
+          ${lockedLine}
+        </ul>
 
-  <div class="decision-hero ${riskLevelClass}">
-    <div class="decision-badge">${badgeText}</div>
-    <div class="decision-text">${summary}</div>
-  </div>
+        <div class="smart-analysis">
+          <div class="sa-hero">
+            <strong>Kurzfazit:</strong>
+            <p>${summary}</p>
+          </div>
 
-  <div class="decision-cards">
-    ${effectivePoints.slice(0,3).map(p => `
-      <div class="risk-card">
-        <span class="risk-icon">❗</span>
-        <span class="risk-text">${p}</span>
-      </div>
-    `).join("")}
-  </div>
+          <div class="sa-box">
+            <h3>⚠️ Die 3 wichtigsten Risiken</h3>
+            <ul>${listItems}</ul>
+          </div>
 
-  <div class="decision-impact">
-    <h3>Was bedeutet das für dich?</h3>
-    <p>Dieser Vertrag kann dich länger binden oder zusätzliche Kosten verursachen, wenn du Fristen übersiehst.</p>
-  </div>
+          <div class="sa-box">
+            <h3>Was bedeutet das für dich?</h3>
+            <p>Du kannst länger zahlen als geplant, Fristen verpassen oder Zusatzkosten auslösen.</p>
+          </div>
 
-  <div class="decision-actions">
-    <button type="button" class="primary-action">📅 Kündigungsfrist merken</button>
-    <button type="button">👀 Vertrag im Blick behalten</button>
-    <button type="button">⚖️ Prüfen lassen</button>
-  </div>
-`;
+          <div class="sa-box">
+            <h3>Nächste Schritte</h3>
+            <ol>
+              <li>Kündigungsfrist notieren</li>
+              <li>Vertrag aktiv überwachen</li>
+              <li>Bei Unsicherheit prüfen lassen</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="pro-upsell">
+          <div class="pro-upsell-tag">Pro (geplant)</div>
+          <p class="pro-upsell-text">
+            In der Pro-Version soll die Auswertung ausführlicher werden – mit Detail-Scores je Themenblock
+            (z.&nbsp;B. Laufzeit, Kündigung, Kosten, Haftung) und Export als PDF-Report. Diese Vorschau speichert deine Texte nicht dauerhaft.
+          </p>
+        </div>
+      `;
     } catch (err) {
-      output.innerHTML = `
+      if (UI_MODE === "decision") {
+        output.innerHTML = renderDecisionUI({
+          riskLevelClass,
+          badgeText,
+          summary,
+          effectivePoints
+        });
+      } else {
+        output.innerHTML = `
         <p class="risk-summary">
           Die Auswertung ist aktuell nicht erreichbar. Bitte versuche es später erneut.
         </p>
@@ -288,6 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
           Technischer Hinweis: Prüfe, ob der Server korrekt konfiguriert ist oder kontaktiere den Betreiber der App.
         </p>
       `;
+      }
     } finally {
       if (analyzeBtn) {
         analyzeBtn.disabled = false;
